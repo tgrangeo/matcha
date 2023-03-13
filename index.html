@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+   <title>Go server</title>
+   <body>  <!-- Début du corps de la page -->
+           
+       <h1>Golang To Do List</h1>
+
+		 <div id="addTodo">
+			<label for="todo">New Todo</label>
+			<input id="nameTodo" name="nameTodo" value="hi" type="text">
+			<button onclick="newTodos()">add</button>
+		 </div>
+
+		 <div id="todoList">
+			<ul id="list"></ul>
+			<button onclick="getTodos()">get todos</button>
+			<button onclick="deleteTodos()">delete todos</button>
+			<button onclick="deleteByName('hi')">delete hi</button>
+			<button onclick="deleteByName('hihi')">delete hihi</button>
+			<button onclick="deleteByName('ff')">delete ff</button>
+		 </div>
+           
+   </body>
+   <script>
+	url = "http://localhost:3000"
+	todos = []
+
+	class todo {
+		constructor(id, name, description) {
+  		  this.id = id;
+  		  this.name = name;
+		  this.description = description;
+  		}
+	}
+
+	function parseData(data){
+		todos = []
+		parse = JSON.parse(data)
+		parse.data.forEach(element => {
+			to = new todo(element.ID, element.Name, element.Description)
+			todos.push(to)
+		});
+	}
+
+	function newTodos(){
+		name = document.getElementById("nameTodo").value
+		data = {Name:name, Description:"ceci est une description"}
+		//console.log(JSON.stringify(data))
+		fetch(url + "/todos",{
+			method:"POST",
+			headers: {
+  		  'Content-Type': 'application/json',
+  		},
+  		body: JSON.stringify(data),
+	})
+}
+//TODO:
+//change db description for done or not done
+//update list not instant update the html file 
+
+	function getTodos(){
+		fetch(url + "/todos",{
+		method:"GET",
+		}).then(
+			response=>response.text()
+		).then(
+			(data) => {parseData(data)}
+		)
+		updateList()
+	}
+
+	function deleteTodos(){
+		fetch(url + "/todos",{
+			method:"DELETE",
+		})
+		var list = document.getElementById("list").innerHTML = '';
+		todos = [];
+		ul_length = 0;
+	}
+
+	function deleteByName(name){
+		// del in db
+		data = {Name:name}
+		fetch(url + "/todos/name",{
+			method:"DELETE",
+			headers: {
+  		  		'Content-Type': 'application/json',
+  			},
+  			body: JSON.stringify(data),
+		})
+		//remove from array
+		i = todos.indexOf(name)
+		todos.splice(i, 1)
+		//remove from ul
+		todel = document.getElementById(name);
+		todel.remove()
+	}
+
+	var ul_length = 0;
+	function updateList(){
+		var ul = document.getElementById("list");
+    	for (i = ul_length; i < todos.length; ++i) {
+			//text
+        	var li = document.createElement('li');
+        	li.innerText = todos[i].name+ ": " + todos[i].description;
+			li.id = todos[i].name;
+			//del button 
+			var del = document.createElement("button")
+			del.innerHTML = "del";
+			//del.onclick = deleteByName(todos[i].name);
+			li.appendChild(del);
+			//update button
+
+        	ul.appendChild(li);
+    	}
+		ul_length = i;
+	}
+
+   </script>
+</html>
