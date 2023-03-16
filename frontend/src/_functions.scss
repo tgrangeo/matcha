@@ -1,0 +1,43 @@
+@function get-pokemon-type-gradient($type) {
+    @if $type == "Normal" {
+        @return linear-gradient(to bottom left, #a8a878, #f5f5f5);
+    } @else if $type == "Fire" {
+        @return linear-gradient(to bottom left, #f08030, #f5ac78);
+    } @else if $type == "Water" {
+        @return linear-gradient(to bottom left, #6890f0, #9db7f5);
+    } @else if $type == "Electric" {
+        @return linear-gradient(to bottom left, #f8d030, #fae078);
+    } @else if $type == "Grass" {
+        @return linear-gradient(to bottom left, #78c850, #a7db8d);
+    } @else if $type == "Ice" {
+        @return linear-gradient(to bottom left, #98d8d8, #c6e2ff);
+    } @else if $type == "Fighting" {
+        @return linear-gradient(to bottom left, #c03028, #f5b7b1);
+    } @else if $type == "Poison" {
+        @return linear-gradient(to bottom left, #a040a0, #c183c1);
+    } @else if $type == "Ground" {
+        @return linear-gradient(to bottom left, #e0c068, #ebd69d);
+    } @else if $type == "Flying" {
+        @return linear-gradient(to bottom left, #a890f0, #c6b7f5);
+    } @else if $type == "Psychic" {
+        @return linear-gradient(to bottom left, #f85888, #fa92b2);
+    } @else if $type == "Bug" {
+        @return linear-gradient(to bottom left, #a8b820, #c6d16e);
+    } @else if $type == "Rock" {
+        @return linear-gradient(to bottom left, #b8a038, #d1c17d);
+    } @else if $type == "Ghost" {
+        @return linear-gradient(to bottom left, #705898, #a292bc);
+    } @else if $type == "Dragon" {
+        @return linear-gradient(to bottom left, #7038f8, #a27dfa);
+    } @else if $type == "Dark" {
+        @return linear-gradient(to bottom left, #705848, #a29288);
+    } @else if $type == "Steel" {
+        @return linear-gradient(to bottom left, #b8b8d0, #d1d1e0);
+    } @else if $type == "Fairy" {
+        @return linear-gradient(to bottom left, #ee99ac, #f4bdc9);
+    } @else {
+        @return null;
+    }
+}
+
+// @export get-pokemon-type-gradient($type);

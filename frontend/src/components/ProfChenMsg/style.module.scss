@@ -1,0 +1,23 @@
+@import "../../common.scss";
+
+.ProfChenMsg {
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	margin: auto;
+	width: 100%;
+	@include contentWidth(800px);
+	simg {
+	}
+	.Bubble {
+		flex-grow: 1;
+		border-radius: 20px;
+		margin-bottom: 20px;
+		padding: 20px;
+		letter-spacing: 2px;
+		background-color: white;
+		border: solid 2px $blue;
+		display: flex;
+		flex-direction: column;
+	}
+}

@@ -1,0 +1,18 @@
+$minMarginTablet: 60px;
+$minMarginMobile: 20px;
+$minMarginDesktop: 80px;
+$tabletBreakpoint: 900px;
+$mobileBreakpoint: 400px;
+$contentwidth: 1400px;
+
+@mixin contentWidth($contentwidthC: 1400px) {
+	max-width: $contentwidthC;
+	margin: 0 auto;
+	@media (max-width: calc($contentwidthC + $minMarginTablet * 2)) {
+		max-width: 100%;
+		margin: 0 $minMarginTablet;
+	}
+	@media (max-width: calc($tabletBreakpoint)) {
+		margin: 0 $minMarginMobile;
+	}
+}

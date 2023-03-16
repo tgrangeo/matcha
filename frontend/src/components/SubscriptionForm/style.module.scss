@@ -1,0 +1,44 @@
+@import "../../common.scss";
+
+.SubscriptionForm {
+	@include contentWidth(900px);
+	// display: flex;/
+	// flex-direction: column;
+	.line {
+		// display: block;
+		// content: "";
+		// height: 0px;
+		// width: 800px;
+		// margin: auto;
+		// box-shadow: #0f124e 0 0 15px 2px;
+		// background-color: #0f124e;
+	}
+	.formPages {
+		width: calc(100% - 160px);
+		background-color: white;
+		padding: 40px 80px;
+		border-radius: 10px;
+		> div {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			margin-bottom: 20px;
+			column-gap: 20px;
+			> p {
+				flex: 1;
+			}
+		}
+		p {
+			display: flex;
+			flex-direction: column;
+			label {
+				margin-bottom: 10px;
+			}
+			input {
+				border: solid 1px #00000043;
+				border-radius: 5px;
+				color: $blue;
+				padding: 7px 14px;
+			}
+		}
+	}
+}
