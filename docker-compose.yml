@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    build:
+    build: 
       dockerfile: ./backend/Dockerfile
     env_file:
       - .env
@@ -10,8 +10,6 @@ services:
       - "8080:8080"
     volumes:
       - ./backend:/opt/app/api
-
-
   db:
    image: postgres:alpine
    environment:

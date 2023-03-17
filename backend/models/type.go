@@ -1,6 +1,6 @@
 package models
 
-import "fmt"
+// import "fmt"
 
 type Type struct {
     Name  string  `json:"name"`
@@ -27,6 +27,6 @@ func InitType() *ListType{
 			Desc:"grass grass grass",
 		},
 	}
-	fmt.Println(list.arr)
+	// fmt.Println(list.arr)
 	return &list
 }

@@ -1,16 +1,7 @@
 # go_serv
 
-wip todolist golang postgresql
 
+enter postgres shell :
 
-next:
-	- create db 
-	- CRUD
-
-
-docker compose build
-docker compose up
-docker compose exec web sh
-
-go get gorm.io/gorm
-go get gorm.io/driver/postgres
+docker exec -it <container id> psql -U postgres
+psql -h localhost -U admin -d matcha
