@@ -6,6 +6,7 @@ import (
 
 
 type User struct {
+    Id any `json:"Id"`
     First_Name  string  `json:"First_Name"`
     Last_Name  string  `json:"Last_Name"`
     Bio string `json:"Bio"`
