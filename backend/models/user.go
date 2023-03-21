@@ -11,4 +11,14 @@ type User struct {
     Last_Name  string  `json:"Last_Name"`
     Bio string `json:"Bio"`
     Mail string `json:"Mail"`
+
+
+
+    //v2
+    //image 
+    //localisation
+    //age 
+    //born_date
+    //gender 
+    //array of tags 
 }
