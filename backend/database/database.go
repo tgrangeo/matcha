@@ -60,7 +60,7 @@ func InsertUser(db *sql.DB, user models.User) {
 }
 
 func UpdateUser(db *sql.DB, user models.User, tofind int) {
-	insertStmt := `UPDATE users SET fname= $1, lname = $2, Bio = $3, mail = $4 WHERE id = $5`
+	insertStmt := `UPDATE users SET fname = $1, lname = $2, Bio = $3, mail = $4 WHERE id = $5`
 	_, err := db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, tofind)
 	if err != nil {
 		panic(err)
@@ -100,11 +100,41 @@ func GetUsersById(db *sql.DB, tofind int) models.User {
 	return usr
 }
 
+func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
+	fmt.Println(tofind, value)
+	rows, err := db.Query("SELECT * FROM users WHERE " + tofind + " = $1", value)
+	if err != nil {
+		fmt.Println(err)
+	}
+	tab := []models.User{}
+	for rows.Next() {
+		var id int
+		var fname, lname, bio, mail string
+		err := rows.Scan(&id, &fname, &lname, &bio, &mail)
+		usr := models.User{id, fname, lname, bio, mail}
+		fmt.Println(usr)
+		tab = append(tab, usr)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	fmt.Println(tab)
+	return tab;
+}
+
 func DelUserById(db *sql.DB, id int){
 	_, err := db.Exec("DELETE FROM users WHERE id = $1", id)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func DelUser(db *sql.DB){
+	_, err := db.Exec("DELETE FROM users")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("all users has been deleted !")
 }
 
 

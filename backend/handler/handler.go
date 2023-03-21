@@ -27,6 +27,18 @@ func GetUsersById(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
+func GetWhere(w http.ResponseWriter, r *http.Request){
+	//TODO:where exist ???
+	params := mux.Vars(r)
+	tofind := params["where"]
+	value := params["value"]
+	fmt.Println(tofind, value)
+	db := database.ConnectDb()
+	users := database.GetUsersWhere(db, tofind, value)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}
+
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	db := database.ConnectDb()
@@ -60,6 +72,7 @@ func DeleteUsersById(w http.ResponseWriter, r *http.Request) {
 	database.DelUserById(db, tofind)
 }
 
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("WIP")
+func DeleteUsers(w http.ResponseWriter, r *http.Request) {
+	db := database.ConnectDb()
+	database.DelUser(db)
 }
