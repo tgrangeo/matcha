@@ -11,6 +11,10 @@ type User struct {
     Last_Name  string  `json:"Last_Name"`
     Bio string `json:"Bio"`
     Mail string `json:"Mail"`
+    Type Type `json:"Type"`
+    Pokeball Type `json:"Pokeball"`
+    BirthDate string `json:"BirthDate"`
+    Age int `json:"age"`
 
 
 

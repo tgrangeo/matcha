@@ -7,9 +7,11 @@ import (
 	"github.com/tgrangeo/matcha/database"
 	"github.com/tgrangeo/matcha/models"
     "github.com/tgrangeo/matcha/handler"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	godotenv.Load(".env")
 	db := database.ConnectDb()
 	// defer database.DropUser`s(db)
 	defer db.Close()
