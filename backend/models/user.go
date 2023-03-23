@@ -15,14 +15,17 @@ type User struct {
     Pokeball Type `json:"Pokeball"`
     BirthDate string `json:"BirthDate"`
     Age int `json:"age"`
+    Pass string `json:"pass"`
 
 
 
     //v2
     //image 
     //localisation
-    //age 
-    //born_date
+    //want
     //gender 
-    //array of tags 
+    //array of tags
+    //likedfrom
+    //userliked
+    //user who see my profile
 }

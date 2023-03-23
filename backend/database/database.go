@@ -6,8 +6,11 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/tgrangeo/matcha/models"
 	"os"
+	
+	//utils
 	"encoding/json"
 	"time"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func ConnectDb() *sql.DB {
@@ -22,7 +25,7 @@ func ConnectDb() *sql.DB {
 }
 
 func CreateTable(db *sql.DB) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS users(id SERIAL PRIMARY KEY, fname TEXT NOT NULL, lname TEXT NOT NULL, Bio TEXT, mail TEXT NOT NULL, type JSONB NOT NULL, pokeball JSONB NOT NULL, birthdate TEXT NOT NULL, age INTEGER)")
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS users(id SERIAL PRIMARY KEY, fname TEXT NOT NULL, lname TEXT NOT NULL, Bio TEXT, mail TEXT NOT NULL, type JSONB NOT NULL, pokeball JSONB NOT NULL, birthdate TEXT NOT NULL, age INTEGER, pass TEXT NOT NULL)")
 	if err != nil {
 		panic(err)
 	}
@@ -71,9 +74,19 @@ func age(birthdate, today time.Time) int {
 }
 
 func stringToTime(s string) time.Time{
-	layout := "00/00/0000"
+	layout := "01/02/2006"
 	t, _ := time.Parse(layout, s)
 	return t
+}
+
+func HashPassword(password string) (string, error) {
+    bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+    return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+    return err == nil
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -86,17 +99,20 @@ func InsertUser(db *sql.DB, user models.User) {
 		fmt.Println("mail already exist")
 		return
 	}
-
+	
+	//crypt pass
+	crypted , _ := HashPassword(user.Pass)
 
 	//create json 
 	typeJson := toJson(user.Type)
 	pokeJson := toJson(user.Pokeball)
 
+	//age from birthdate 
 	age := age(stringToTime(user.BirthDate), time.Now())
 	fmt.Println(age)
 
-	insertStmt := `INSERT INTO users (fname,lname,Bio,mail,type,pokeball,birthdate,age) VALUES ($1, $2, $3, $4, $5, $6, $7,$8)`
-	_, err = db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, user.BirthDate, age)
+	insertStmt := `INSERT INTO users (fname,lname,Bio,mail,type,pokeball,birthdate,age,pass) VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9)`
+	_, err = db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, user.BirthDate, age, crypted)
 	if err != nil {
 		panic(err)
 	}
@@ -107,9 +123,11 @@ func UpdateUser(db *sql.DB, user models.User, tofind int) {
 	//create json 
 	typeJson := toJson(user.Type)
 	pokeJson := toJson(user.Pokeball)
+	//crypt pass
+	crypted , _ := HashPassword(user.Pass) 
 	age := age(stringToTime(user.BirthDate), time.Now())
-	insertStmt := `UPDATE users SET fname = $1, lname = $2, Bio = $3, mail = $4, type = $5, pokeball = $6, birthdate = $8, age = $9 WHERE id = $7`
-	_, err := db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, tofind, user.BirthDate, age)
+	insertStmt := `UPDATE users SET fname = $1, lname = $2, Bio = $3, mail = $4, type = $5, pokeball = $6, birthdate = $8, age = $9, pass = $10 WHERE id = $7`
+	_, err := db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, tofind, user.BirthDate, age, crypted)
 	if err != nil {
 		panic(err)
 	}
@@ -121,31 +139,29 @@ func GetUsers(db *sql.DB) []models.User {
 	rows, _ := db.Query("SELECT * FROM users")
 	for rows.Next() {
 		var id, age int
-		var fname, lname, bio, mail, birthdate string
+		var fname, lname, bio, mail, birthdate, pass string
 		var t, p []byte
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate, &age)
-		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate, age}
-		fmt.Println(usr)
+		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate, &age, &pass)
+		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate, age, pass}
 		tab = append(tab, usr)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
-	// fmt.Println(tab)
 	return tab
 }
 
 func GetUsersById(db *sql.DB, tofind int) models.User {
 	var id,age int
-	var fname, lname, bio, mail,birthdate string
+	var fname, lname, bio, mail,birthdate,pass string
 	var t, p []byte
 	row, err := db.Query("SELECT * FROM users WHERE id = $1", tofind)
 	if err != nil {
 		fmt.Println(err)
 	}
 	row.Next()
-	row.Scan(&id, &fname, &lname, &bio, &mail, &t, &p,&birthdate, &age)
-	usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate,age}
+	row.Scan(&id, &fname, &lname, &bio, &mail, &t, &p,&birthdate, &age,&pass)
+	usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate,age, pass}
 	// fmt.Println(usr)
 	return usr
 }
@@ -165,10 +181,10 @@ func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
 	tab := []models.User{}
 	for rows.Next() {
 		var id,age int
-		var fname, lname, bio, mail,birthdate string
+		var fname, lname, bio, mail,birthdate,pass string
 		var t, p []byte
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate,&age)
-		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p),birthdate,age}
+		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate,&age,&pass)
+		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p),birthdate,age,pass}
 		fmt.Println(usr)
 		tab = append(tab, usr)
 		if err != nil {
