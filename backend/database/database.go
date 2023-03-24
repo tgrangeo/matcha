@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"github.com/tgrangeo/matcha/models"
 	"os"
 	
@@ -25,7 +25,7 @@ func ConnectDb() *sql.DB {
 }
 
 func CreateTable(db *sql.DB) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS users(id SERIAL PRIMARY KEY, fname TEXT NOT NULL, lname TEXT NOT NULL, Bio TEXT, mail TEXT NOT NULL, type JSONB NOT NULL, pokeball JSONB NOT NULL, birthdate TEXT NOT NULL, age INTEGER, pass TEXT NOT NULL)")
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS users(id SERIAL PRIMARY KEY, fname TEXT NOT NULL, lname TEXT NOT NULL, Bio TEXT, mail TEXT NOT NULL, type JSONB NOT NULL, pokeball JSONB NOT NULL, birthdate TEXT NOT NULL, age INTEGER, pass TEXT NOT NULL, gender INTEGER NOT NULL, desiredgender INTEGER NOT NULL, tags TEXT ARRAY)")
 	if err != nil {
 		panic(err)
 	}
@@ -111,8 +111,8 @@ func InsertUser(db *sql.DB, user models.User) {
 	age := age(stringToTime(user.BirthDate), time.Now())
 	fmt.Println(age)
 
-	insertStmt := `INSERT INTO users (fname,lname,Bio,mail,type,pokeball,birthdate,age,pass) VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9)`
-	_, err = db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, user.BirthDate, age, crypted)
+	insertStmt := `INSERT INTO users (fname,lname,Bio,mail,type,pokeball,birthdate,age,pass,gender,desiredgender,tags) VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9, $10, $11, $12)`
+	_, err = db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, user.BirthDate, age, crypted, user.Gender, user.DesiredGender, pq.Array(user.Tags))
 	if err != nil {
 		panic(err)
 	}
@@ -126,8 +126,8 @@ func UpdateUser(db *sql.DB, user models.User, tofind int) {
 	//crypt pass
 	crypted , _ := HashPassword(user.Pass) 
 	age := age(stringToTime(user.BirthDate), time.Now())
-	insertStmt := `UPDATE users SET fname = $1, lname = $2, Bio = $3, mail = $4, type = $5, pokeball = $6, birthdate = $8, age = $9, pass = $10 WHERE id = $7`
-	_, err := db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, tofind, user.BirthDate, age, crypted)
+	insertStmt := `UPDATE users SET fname = $1, lname = $2, Bio = $3, mail = $4, type = $5, pokeball = $6, birthdate = $8, age = $9, pass = $10, gender = $11, desiredgender = $12, tags = $13 WHERE id = $7`
+	_, err := db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, tofind, user.BirthDate, age, crypted, user.Gender, user.DesiredGender, pq.Array(user.Tags))
 	if err != nil {
 		panic(err)
 	}
@@ -138,11 +138,12 @@ func GetUsers(db *sql.DB) []models.User {
 	tab := []models.User{}
 	rows, _ := db.Query("SELECT * FROM users")
 	for rows.Next() {
-		var id, age int
+		var id, age, gender, desired int
 		var fname, lname, bio, mail, birthdate, pass string
 		var t, p []byte
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate, &age, &pass)
-		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate, age, pass}
+		var tags []string
+		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate, &age, &pass, &gender,&desired,(*pq.StringArray)(&tags))
+		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate, age, pass, gender,desired,tags}
 		tab = append(tab, usr)
 		if err != nil {
 			fmt.Println(err)
@@ -152,39 +153,50 @@ func GetUsers(db *sql.DB) []models.User {
 }
 
 func GetUsersById(db *sql.DB, tofind int) models.User {
-	var id,age int
+	var id,age, gender, desired int
 	var fname, lname, bio, mail,birthdate,pass string
 	var t, p []byte
+	var tags []string
 	row, err := db.Query("SELECT * FROM users WHERE id = $1", tofind)
 	if err != nil {
 		fmt.Println(err)
 	}
 	row.Next()
-	row.Scan(&id, &fname, &lname, &bio, &mail, &t, &p,&birthdate, &age,&pass)
-	usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate,age, pass}
+	row.Scan(&id, &fname, &lname, &bio, &mail, &t, &p,&birthdate, &age,&pass, &gender,&desired,(*pq.StringArray)(&tags))
+	usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate,age, pass,gender,desired,tags}
 	// fmt.Println(usr)
 	return usr
 }
 
 func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
-	fmt.Println(tofind, value)
-	if (tofind == "type"){
-		tofind = "type->>'name'" // permet d'aller chercher des elements dans la struct stockée en json (ici le nom du type) 
-	}
-	if (tofind == "pokeball"){
-		tofind = "pokeball->>'name'" // ici le nom de la pokeball 
-	}
-	rows, err := db.Query("SELECT * FROM users WHERE " + tofind + " = $1", value)
-	if err != nil {
-		fmt.Println(err)
+
+	//TODO: get by tags
+
+	var rows *sql.Rows
+	var err error
+	if (tofind == "tags"){
+		rows, err = db.Query("SELECT * FROM users WHERE tags @> ARRAY['" + value + "']::TEXT[]")
+	}else {
+		fmt.Println(tofind, value)
+		if (tofind == "type"){
+			tofind = "type->>'name'" // permet d'aller chercher des elements dans la struct stockée en json (ici le nom du type) 
+		}
+		if (tofind == "pokeball"){
+			tofind = "pokeball->>'name'" // ici le nom de la pokeball 
+		}
+		rows, err = db.Query("SELECT * FROM users WHERE " + tofind + " = $1", value)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 	tab := []models.User{}
 	for rows.Next() {
-		var id,age int
+		var id,age,gender,desired int
 		var fname, lname, bio, mail,birthdate,pass string
 		var t, p []byte
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate,&age,&pass)
-		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p),birthdate,age,pass}
+		var tags []string
+		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate,&age,&pass,&gender,&desired,(*pq.StringArray)(&tags))
+		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p),birthdate,age,pass,gender,desired,tags}
 		fmt.Println(usr)
 		tab = append(tab, usr)
 		if err != nil {
