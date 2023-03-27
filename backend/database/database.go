@@ -38,10 +38,10 @@ func CreateTable(db *sql.DB) {
 		pass TEXT NOT NULL,
 		gender INTEGER NOT NULL,
 		desiredgender INTEGER NOT NULL,
-		tags TEXT ARRAY,
-		userliked TEXT ARRAY,
-		likedfrom TEXT ARRAY,
-		seenfrom TEXT ARRAY
+		tags INTEGER ARRAY,
+		userliked INTEGER ARRAY,
+		likedfrom INTEGER ARRAY,
+		seenfrom INTEGER ARRAY
 	)`)
 	if err != nil {
 		panic(err)
@@ -159,8 +159,8 @@ func GetUsers(db *sql.DB) []models.User {
 		var id, age, gender, desired int
 		var fname, lname, bio, mail, birthdate, pass string
 		var t, p []byte
-		var tags, userliked, likedfrom, seenfrom []string
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate, &age, &pass, &gender,&desired,(*pq.StringArray)(&tags),(*pq.StringArray)(&userliked),(*pq.StringArray)(&likedfrom),(*pq.StringArray)(&seenfrom))
+		var tags, userliked, likedfrom, seenfrom []int64
+		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate, &age, &pass, &gender,&desired,(*pq.Int64Array)(&tags),(*pq.Int64Array)(&userliked),(*pq.Int64Array)(&likedfrom),(*pq.Int64Array)(&seenfrom))
 		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate, age, pass, gender,desired,tags, userliked,likedfrom,seenfrom}
 		tab = append(tab, usr)
 		if err != nil {
@@ -174,13 +174,13 @@ func GetUsersById(db *sql.DB, tofind int) models.User {
 	var id,age, gender, desired int
 	var fname, lname, bio, mail,birthdate,pass string
 	var t, p []byte
-	var tags ,userliked, likedfrom,seenfrom[]string
+	var tags ,userliked, likedfrom,seenfrom[]int64
 	row, err := db.Query("SELECT * FROM users WHERE id = $1", tofind)
 	if err != nil {
 		fmt.Println(err)
 	}
 	row.Next()
-	row.Scan(&id, &fname, &lname, &bio, &mail, &t, &p,&birthdate, &age,&pass, &gender,&desired,(*pq.StringArray)(&tags),(*pq.StringArray)(&userliked),(*pq.StringArray)(&likedfrom),(*pq.StringArray)(&seenfrom))
+	row.Scan(&id, &fname, &lname, &bio, &mail, &t, &p,&birthdate, &age,&pass, &gender,&desired,(*pq.Int64Array)(&tags),(*pq.Int64Array)(&userliked),(*pq.Int64Array)(&likedfrom),(*pq.Int64Array)(&seenfrom))
 	usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate,age, pass,gender,desired,tags,userliked,likedfrom,seenfrom}
 	// fmt.Println(usr)
 	return usr
@@ -190,7 +190,7 @@ func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
 	var rows *sql.Rows
 	var err error
 	if (tofind == "tags" || tofind == "userliked" || tofind == "likedfrom" || tofind == "seenfrom"){
-		rows, err = db.Query("SELECT * FROM users WHERE "+ tofind + " @> ARRAY['" + value + "']::TEXT[]")
+		rows, err = db.Query("SELECT * FROM users WHERE "+ tofind + " @> ARRAY[" + value + "]::INTEGER[]")
 	}else {
 		fmt.Println(tofind, value)
 		if (tofind == "type"){
@@ -209,8 +209,8 @@ func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
 		var id,age,gender,desired int
 		var fname, lname, bio, mail,birthdate,pass string
 		var t, p []byte
-		var tags, userliked, likedfrom, seenfrom []string
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate,&age,&pass,&gender,&desired,(*pq.StringArray)(&tags),(*pq.StringArray)(&userliked),(*pq.StringArray)(&likedfrom),(*pq.StringArray)(&seenfrom))
+		var tags, userliked, likedfrom, seenfrom []int64
+		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate,&age,&pass,&gender,&desired,(*pq.Int64Array)(&tags),(*pq.Int64Array)(&userliked),(*pq.Int64Array)(&likedfrom),(*pq.Int64Array)(&seenfrom))
 		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p),birthdate,age,pass,gender,desired,tags,userliked,likedfrom,seenfrom}
 		fmt.Println(usr)
 		tab = append(tab, usr)

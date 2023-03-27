@@ -19,10 +19,10 @@ type User struct {
     // Fame int `json:Pass`
     Gender int `json:"Gender"`  // 0 homme 1 femme 2 autres
     DesiredGender int `json:"DesiredGender"`// 0 homme 1 femme 2 autres (3h+f ???? )
-    Tags []string `json:"Tags"`
-    UserLiked []string `json:"UserLiked"`
-    LikedFrom []string `json:"LikedFrom"`
-    SeenFrom []string `json:"SeenFrom"`
+    Tags []int64 `json:"Tags"`
+    UserLiked []int64 `json:"UserLiked"`
+    LikedFrom []int64 `json:"LikedFrom"`
+    SeenFrom []int64 `json:"SeenFrom"`
     //v2
     //image 
     //localisation
