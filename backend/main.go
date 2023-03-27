@@ -25,6 +25,7 @@ func main() {
 	router.HandleFunc("/api/v1/users", handler.GetUsers).Methods("GET")
 	router.HandleFunc("/api/v1/users/{id}", handler.GetUsersById).Methods("GET")
 	router.HandleFunc("/api/v1/users/{where}/{value}", handler.GetWhere).Methods("GET")
+	// router.HandleFunc("/api/v1/users/?", handler.GetWhere).Methods("GET") URL PARAMS 
         //create
 	router.HandleFunc("/api/v1/users", handler.CreateUser).Methods("POST")
         //update

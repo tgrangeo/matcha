@@ -17,6 +17,7 @@ func ConnectDb() *sql.DB {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		"db", 5432, os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 	db, err := sql.Open("postgres", connStr)
+
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +26,23 @@ func ConnectDb() *sql.DB {
 }
 
 func CreateTable(db *sql.DB) {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS users(id SERIAL PRIMARY KEY, fname TEXT NOT NULL, lname TEXT NOT NULL, Bio TEXT, mail TEXT NOT NULL, type JSONB NOT NULL, pokeball JSONB NOT NULL, birthdate TEXT NOT NULL, age INTEGER, pass TEXT NOT NULL, gender INTEGER NOT NULL, desiredgender INTEGER NOT NULL, tags TEXT ARRAY)")
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users(id SERIAL PRIMARY KEY,
+		fname TEXT NOT NULL,
+		lname TEXT NOT NULL,
+		Bio TEXT,
+		mail TEXT NOT NULL,
+		type JSONB NOT NULL,
+		pokeball JSONB NOT NULL,
+		birthdate TEXT NOT NULL,
+		age INTEGER,
+		pass TEXT NOT NULL,
+		gender INTEGER NOT NULL,
+		desiredgender INTEGER NOT NULL,
+		tags TEXT ARRAY,
+		userliked TEXT ARRAY,
+		likedfrom TEXT ARRAY,
+		seenfrom TEXT ARRAY
+	)`)
 	if err != nil {
 		panic(err)
 	}
@@ -99,7 +116,7 @@ func InsertUser(db *sql.DB, user models.User) {
 		fmt.Println("mail already exist")
 		return
 	}
-	
+
 	//crypt pass
 	crypted , _ := HashPassword(user.Pass)
 
@@ -107,12 +124,13 @@ func InsertUser(db *sql.DB, user models.User) {
 	typeJson := toJson(user.Type)
 	pokeJson := toJson(user.Pokeball)
 
-	//age from birthdate 
+	//age from birthdate
 	age := age(stringToTime(user.BirthDate), time.Now())
-	fmt.Println(age)
+	fmt.Println(user.Pass)
 
-	insertStmt := `INSERT INTO users (fname,lname,Bio,mail,type,pokeball,birthdate,age,pass,gender,desiredgender,tags) VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9, $10, $11, $12)`
-	_, err = db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, user.BirthDate, age, crypted, user.Gender, user.DesiredGender, pq.Array(user.Tags))
+	insertStmt := `INSERT INTO users (fname,lname,Bio,mail,type,pokeball,birthdate,age,pass,gender,desiredgender,tags,userliked,likedfrom,seenfrom) 
+					VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9, $10, $11, $12, $13, $14, $15)`
+	_, err = db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, user.BirthDate, age, crypted, user.Gender, user.DesiredGender, pq.Array(user.Tags), pq.Array(user.UserLiked), pq.Array(user.LikedFrom), pq.Array(user.SeenFrom))
 	if err != nil {
 		panic(err)
 	}
@@ -126,8 +144,8 @@ func UpdateUser(db *sql.DB, user models.User, tofind int) {
 	//crypt pass
 	crypted , _ := HashPassword(user.Pass) 
 	age := age(stringToTime(user.BirthDate), time.Now())
-	insertStmt := `UPDATE users SET fname = $1, lname = $2, Bio = $3, mail = $4, type = $5, pokeball = $6, birthdate = $8, age = $9, pass = $10, gender = $11, desiredgender = $12, tags = $13 WHERE id = $7`
-	_, err := db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, tofind, user.BirthDate, age, crypted, user.Gender, user.DesiredGender, pq.Array(user.Tags))
+	insertStmt := `UPDATE users SET fname = $1, lname = $2, Bio = $3, mail = $4, type = $5, pokeball = $6, birthdate = $8, age = $9, pass = $10, gender = $11, desiredgender = $12, tags = $13, userliked = $14, likedfrom = $15, seenfrom = $16 WHERE id = $7`
+	_, err := db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, tofind, user.BirthDate, age, crypted, user.Gender, user.DesiredGender, pq.Array(user.Tags), pq.Array(user.UserLiked), pq.Array(user.LikedFrom), pq.Array(user.SeenFrom))
 	if err != nil {
 		panic(err)
 	}
@@ -141,9 +159,9 @@ func GetUsers(db *sql.DB) []models.User {
 		var id, age, gender, desired int
 		var fname, lname, bio, mail, birthdate, pass string
 		var t, p []byte
-		var tags []string
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate, &age, &pass, &gender,&desired,(*pq.StringArray)(&tags))
-		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate, age, pass, gender,desired,tags}
+		var tags, userliked, likedfrom, seenfrom []string
+		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate, &age, &pass, &gender,&desired,(*pq.StringArray)(&tags),(*pq.StringArray)(&userliked),(*pq.StringArray)(&likedfrom),(*pq.StringArray)(&seenfrom))
+		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate, age, pass, gender,desired,tags, userliked,likedfrom,seenfrom}
 		tab = append(tab, usr)
 		if err != nil {
 			fmt.Println(err)
@@ -156,26 +174,23 @@ func GetUsersById(db *sql.DB, tofind int) models.User {
 	var id,age, gender, desired int
 	var fname, lname, bio, mail,birthdate,pass string
 	var t, p []byte
-	var tags []string
+	var tags ,userliked, likedfrom,seenfrom[]string
 	row, err := db.Query("SELECT * FROM users WHERE id = $1", tofind)
 	if err != nil {
 		fmt.Println(err)
 	}
 	row.Next()
-	row.Scan(&id, &fname, &lname, &bio, &mail, &t, &p,&birthdate, &age,&pass, &gender,&desired,(*pq.StringArray)(&tags))
-	usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate,age, pass,gender,desired,tags}
+	row.Scan(&id, &fname, &lname, &bio, &mail, &t, &p,&birthdate, &age,&pass, &gender,&desired,(*pq.StringArray)(&tags),(*pq.StringArray)(&userliked),(*pq.StringArray)(&likedfrom),(*pq.StringArray)(&seenfrom))
+	usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate,age, pass,gender,desired,tags,userliked,likedfrom,seenfrom}
 	// fmt.Println(usr)
 	return usr
 }
 
 func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
-
-	//TODO: get by tags
-
 	var rows *sql.Rows
 	var err error
-	if (tofind == "tags"){
-		rows, err = db.Query("SELECT * FROM users WHERE tags @> ARRAY['" + value + "']::TEXT[]")
+	if (tofind == "tags" || tofind == "userliked" || tofind == "likedfrom" || tofind == "seenfrom"){
+		rows, err = db.Query("SELECT * FROM users WHERE "+ tofind + " @> ARRAY['" + value + "']::TEXT[]")
 	}else {
 		fmt.Println(tofind, value)
 		if (tofind == "type"){
@@ -194,9 +209,9 @@ func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
 		var id,age,gender,desired int
 		var fname, lname, bio, mail,birthdate,pass string
 		var t, p []byte
-		var tags []string
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate,&age,&pass,&gender,&desired,(*pq.StringArray)(&tags))
-		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p),birthdate,age,pass,gender,desired,tags}
+		var tags, userliked, likedfrom, seenfrom []string
+		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate,&age,&pass,&gender,&desired,(*pq.StringArray)(&tags),(*pq.StringArray)(&userliked),(*pq.StringArray)(&likedfrom),(*pq.StringArray)(&seenfrom))
+		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p),birthdate,age,pass,gender,desired,tags,userliked,likedfrom,seenfrom}
 		fmt.Println(usr)
 		tab = append(tab, usr)
 		if err != nil {
@@ -221,7 +236,6 @@ func DelUser(db *sql.DB){
 	}
 	fmt.Println("all users has been deleted !")
 }
-
 
 func DropUsers(db *sql.DB) {
 	_, err := db.Exec("CREATE TABLE IF EXIST users")
