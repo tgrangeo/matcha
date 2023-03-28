@@ -1,5 +1,8 @@
-FROM golang:1.18.0
+FROM golang:1.18 as base
 
-WORKDIR /usr/src/app
+FROM base as dev
 
-COPY . .
+RUN curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+
+WORKDIR /opt/app/api
+CMD ["air"]
