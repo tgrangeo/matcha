@@ -17,6 +17,7 @@
 		letter-spacing: 2px;
 		background-color: white;
 		border: solid 2px $blue;
+		transition: all 0.5s ease;
 		display: flex;
 		flex-direction: column;
 	}

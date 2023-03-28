@@ -1,0 +1,44 @@
+@import "../../../../common.scss";
+
+.Attract {
+	margin: auto;
+	width: fit-content;
+	// align-items: center;
+	input {
+		height: 1px;
+		width: 1px;
+		border: none;
+	}
+	.checkbox {
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		&:not(:last-child) {
+			margin-bottom: 10px;
+		}
+		.check {
+			height: 12px;
+			margin-right: 10px;
+			width: 12px;
+			border-radius: 20%;
+			border: solid 1px $blue;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			&:after {
+				display: block;
+				content: "";
+				height: 0px;
+				width: 0px;
+				border-radius: 20%;
+				background-color: #00000000;
+				transition: all 0.5s ease;
+			}
+			&.active:after {
+				height: 8px;
+				width: 8px;
+				background-color: $blue;
+			}
+		}
+	}
+}

@@ -21,24 +21,24 @@ import clsx from "clsx";
 const TypeIcon = ({ type }) => {
 	return (
 		<div className={clsx(style.TypeIcon, style[type])}>
-			{type === "bug" && <Bug />}
-			{type === "dark" && <Dark />}
+			{type === "insecte" && <Bug />}
+			{type === "sombre" && <Dark />}
 			{type === "dragon" && <Dragon />}
-			{type === "electric" && <Electric />}
-			{type === "fairy" && <Fairy />}
-			{type === "fighting" && <Fighting />}
-			{type === "fire" && <Fire />}
-			{type === "flying" && <Flying />}
-			{type === "ghost" && <Ghost />}
-			{type === "grass" && <Grass />}
-			{type === "ground" && <Ground />}
-			{type === "ice" && <Ice />}
+			{type === "electrik" && <Electric />}
+			{type === "fee" && <Fairy />}
+			{type === "combat" && <Fighting />}
+			{type === "feu" && <Fire />}
+			{type === "vol" && <Flying />}
+			{type === "spectre" && <Ghost />}
+			{type === "plante" && <Grass />}
+			{type === "sol" && <Ground />}
+			{type === "glace" && <Ice />}
 			{type === "normal" && <Normal />}
 			{type === "poison" && <Poison />}
-			{type === "psychic" && <Psychic />}
-			{type === "rock" && <Rock />}
-			{type === "steel" && <Steel />}
-			{type === "water" && <Water />}
+			{type === "psy" && <Psychic />}
+			{type === "roche" && <Rock />}
+			{type === "acier" && <Steel />}
+			{type === "eau" && <Water />}
 		</div>
 	);
 };
