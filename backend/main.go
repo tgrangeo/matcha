@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 	"github.com/tgrangeo/matcha/database"
-	"github.com/tgrangeo/matcha/models"
+	// "github.com/tgrangeo/matcha/models"
     "github.com/tgrangeo/matcha/handler"
 	"github.com/joho/godotenv"
 )
@@ -13,12 +13,9 @@ import (
 func main() {
 	godotenv.Load(".env")
 	db := database.ConnectDb()
-	// defer database.DropUser`s(db)
 	defer db.Close()
 	database.CreateTable(db)
-	//database.GetUsers(db)
 
-	fmt.Println(models.Tags[42])
         
 	router := mux.NewRouter()
         //read

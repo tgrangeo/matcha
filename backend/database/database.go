@@ -3,13 +3,15 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"os"
+
 	"github.com/lib/pq"
 	"github.com/tgrangeo/matcha/models"
-	"os"
-	
+
 	//utils
 	"encoding/json"
 	"time"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -25,51 +27,79 @@ func ConnectDb() *sql.DB {
 	return db
 }
 
-func CreateTable(db *sql.DB) {
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users(id SERIAL PRIMARY KEY,
-		fname TEXT NOT NULL,
-		lname TEXT NOT NULL,
-		Bio TEXT,
-		mail TEXT NOT NULL,
-		type JSONB NOT NULL,
-		pokeball JSONB NOT NULL,
-		birthdate TEXT NOT NULL,
-		age INTEGER,
-		pass TEXT NOT NULL,
-		gender INTEGER NOT NULL,
-		desiredgender INTEGER NOT NULL,
-		tags INTEGER ARRAY,
-		userliked INTEGER ARRAY,
-		likedfrom INTEGER ARRAY,
-		seenfrom INTEGER ARRAY
-	)`)
-	if err != nil {
-		panic(err)
+func CreateTable(db *sql.DB) error {
+
+	tableDefs := []string{
+		`CREATE TABLE IF NOT EXISTS users(
+			id SERIAL PRIMARY KEY,
+			fname TEXT NOT NULL,
+			lname TEXT NOT NULL,
+			email TEXT NOT NULL,
+			birthdate TEXT NOT NULL,
+			pass TEXT NOT NULL,
+			bio TEXT,
+			imageurl TEXT ARRAY,
+			age INTEGER,
+			gender INTEGER NOT NULL,
+			desiredgender INTEGER ARRAY NOT NULL,
+			fame INTEGER,
+			tags INTEGER ARRAY,
+			pokeball INTEGER ARRAY NOT NULL,
+			type INTEGER ARRAY NOT NULL,
+			userliked INTEGER ARRAY,
+			likedfrom INTEGER ARRAY,
+			seenfrom INTEGER ARRAY,
+			blocked INTEGER ARRAY,
+			convlist INTEGER ARRAY,
+			coord JSONB,
+			notifs JSONB,
+			isactive BOOLEAN
+		)`,
+		`CREATE TABLE IF NOT EXISTS pokeballs( id SERIAL PRIMARY KEY, name TEXT NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL)`,
+		`CREATE TABLE IF NOT EXISTS tags( id SERIAL PRIMARY KEY, name TEXT NOT NULL)`,
+		`CREATE TABLE IF NOT EXISTS types( id SERIAL PRIMARY KEY, name TEXT NOT NULL, description TEXT NOT NULL)`,
+		`CREATE TABLE IF NOT EXISTS conversations( id SERIAL PRIMARY KEY, user1 INTEGER, user2 INTEGER, messages JSONB)`,
 	}
-	fmt.Println("table users created")
+	for _, tableDef := range tableDefs {
+		_, err := db.Exec(tableDef)
+		if err != nil {
+			return err
+		}
+	}
+	fmt.Println("Table created !")
+	return nil
 }
 
-
-//////////////////////////////////////////////////////////////////////////////TODO: make an utils package 
+//////////////////////////////////////////////////////////////////////////////TODO: make an utils package
 func mailExists(db *sql.DB, user models.User) (bool, error) {
-	query := "SELECT COUNT(*) FROM users WHERE mail = $1"
+	query := "SELECT COUNT(*) FROM users WHERE email = $1"
 	var count int
-	err := db.QueryRow(query, user.Mail).Scan(&count)
+	err := db.QueryRow(query, user.Email).Scan(&count)
 	if err != nil {
 		return false, err
 	}
 	return count > 0, nil
 }
 
-func toJson(t models.Type) []byte {
-	ret , _  := json.Marshal(t)
+func LocToJson(t models.Loc) []byte {
+	ret, _ := json.Marshal(t)
 	return ret
 }
 
-func fromJson(t []byte) models.Type {
-	var data models.Type
+func JsonToLoc(t []byte) models.Loc {
+	var data models.Loc
 	json.Unmarshal(t, &data)
-	//ret := models.Type{data[0].name, data[0].desc}
+	return data
+}
+
+func NotifsToJson(t []models.Notif) []byte {
+	ret, _ := json.Marshal(t)
+	return ret
+}
+
+func JsonToNotifs(t []byte) []models.Notif {
+	var data []models.Notif
+	json.Unmarshal(t, &data)
 	return data
 }
 
@@ -90,78 +120,78 @@ func age(birthdate, today time.Time) int {
 	return age
 }
 
-func stringToTime(s string) time.Time{
+func stringToTime(s string) time.Time {
 	layout := "01/02/2006"
 	t, _ := time.Parse(layout, s)
 	return t
 }
 
 func HashPassword(password string) (string, error) {
-    bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-    return string(bytes), err
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
 }
 
 func CheckPasswordHash(password, hash string) bool {
-    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-    return err == nil
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 func InsertUser(db *sql.DB, user models.User) {
+	fmt.Println(user)
 	exists, err := mailExists(db, user)
 	if err != nil {
 		fmt.Println(err)
 	}
 	if exists {
-		fmt.Println("mail already exist")
+		fmt.Println("email already exist")
 		return
 	}
 
 	//crypt pass
-	crypted , _ := HashPassword(user.Pass)
-
-	//create json 
-	typeJson := toJson(user.Type)
-	pokeJson := toJson(user.Pokeball)
+	crypted, _ := HashPassword(user.Pass)
 
 	//age from birthdate
-	age := age(stringToTime(user.BirthDate), time.Now())
-	fmt.Println(user.Pass)
+	age := age(stringToTime(user.Birthdate), time.Now())
 
-	insertStmt := `INSERT INTO users (fname,lname,Bio,mail,type,pokeball,birthdate,age,pass,gender,desiredgender,tags,userliked,likedfrom,seenfrom) 
-					VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9, $10, $11, $12, $13, $14, $15)`
-	_, err = db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, user.BirthDate, age, crypted, user.Gender, user.DesiredGender, pq.Array(user.Tags), pq.Array(user.UserLiked), pq.Array(user.LikedFrom), pq.Array(user.SeenFrom))
+	insertStmt := `INSERT INTO users (fname,lname,email,birthdate,pass,bio,imageurl,age,gender,desiredgender,fame,tags,pokeball,type,userliked,likedfrom,seenfrom,blocked,convlist,coord,notifs,isactive) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`
+	_, err = db.Exec(insertStmt, user.Fname, user.Lname, user.Email, user.Birthdate, crypted, user.Bio, pq.StringArray(user.Imageurl), age, user.Gender, pq.Array(user.Desiredgender), user.Fame, pq.Array(user.Tags),
+		pq.Array(user.Pokeball), pq.Array(user.Type), pq.Array(user.Userliked), pq.Array(user.Likedfrom), pq.Array(user.Seenfrom), pq.Array(user.Blocked), pq.Array(user.Convlist), LocToJson(user.Coord), NotifsToJson(user.Notifs), user.Isactive)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("User " + user.First_Name + " added !")
+	fmt.Println("User " + user.Fname + " added !")
 }
 
 func UpdateUser(db *sql.DB, user models.User, tofind int) {
-	//create json 
-	typeJson := toJson(user.Type)
-	pokeJson := toJson(user.Pokeball)
 	//crypt pass
-	crypted , _ := HashPassword(user.Pass) 
-	age := age(stringToTime(user.BirthDate), time.Now())
-	insertStmt := `UPDATE users SET fname = $1, lname = $2, Bio = $3, mail = $4, type = $5, pokeball = $6, birthdate = $8, age = $9, pass = $10, gender = $11, desiredgender = $12, tags = $13, userliked = $14, likedfrom = $15, seenfrom = $16 WHERE id = $7`
-	_, err := db.Exec(insertStmt, user.First_Name, user.Last_Name, user.Bio, user.Mail, typeJson, pokeJson, tofind, user.BirthDate, age, crypted, user.Gender, user.DesiredGender, pq.Array(user.Tags), pq.Array(user.UserLiked), pq.Array(user.LikedFrom), pq.Array(user.SeenFrom))
+	crypted, _ := HashPassword(user.Pass)
+	age := age(stringToTime(user.Birthdate), time.Now())
+	insertStmt := `UPDATE users SET fname = $1, lname = $2, email = $3, birthdate = $4, pass = $5, bio = $6, imageurl = $8, age = $9, gender = $10, desiredgender = $11, fame = $12, tags = $13, pokeball = $14, type = $15, userliked = $16, likedfrom = $17, seenfrom = $18, blocked = $19, convlist = $20, coord = $21, notifs = $22, isactive = $23 WHERE id = $7`
+	_, err := db.Exec(insertStmt, user.Fname, user.Lname, user.Email, user.Birthdate, crypted, user.Bio, user.Id, pq.StringArray(user.Imageurl), age, user.Gender, pq.Array(user.Desiredgender), user.Fame, pq.Array(user.Tags),
+		pq.Array(user.Pokeball), pq.Array(user.Type), pq.Array(user.Userliked), pq.Array(user.Likedfrom), pq.Array(user.Seenfrom), pq.Array(user.Blocked), pq.Array(user.Convlist), LocToJson(user.Coord), NotifsToJson(user.Notifs), user.Isactive)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("User " + user.First_Name + " updated !")
+	fmt.Println("User " + user.Fname + " updated !")
 }
 
 func GetUsers(db *sql.DB) []models.User {
 	tab := []models.User{}
 	rows, _ := db.Query("SELECT * FROM users")
 	for rows.Next() {
-		var id, age, gender, desired int
-		var fname, lname, bio, mail, birthdate, pass string
-		var t, p []byte
-		var tags, userliked, likedfrom, seenfrom []int64
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate, &age, &pass, &gender,&desired,(*pq.Int64Array)(&tags),(*pq.Int64Array)(&userliked),(*pq.Int64Array)(&likedfrom),(*pq.Int64Array)(&seenfrom))
-		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate, age, pass, gender,desired,tags, userliked,likedfrom,seenfrom}
+		var fname, lname, email, birthdate, pass, bio string
+		var imageurl []string
+		var id, age, gender, fame int64
+		var tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
+		var coord, notifs []byte
+		var isactive bool
+		err := rows.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.Int64Array)(&tags),
+			(*pq.Int64Array)(&Type), (*pq.Int64Array)(&pokeball), (*pq.Int64Array)(&userliked), (*pq.Int64Array)(&likedfrom), (*pq.Int64Array)(&seenfrom),
+			(*pq.Int64Array)(&blocked), (*pq.Int64Array)(&convlist), &coord, &notifs, &isactive)
+		usr := models.User{id, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, JsonToLoc(coord), JsonToNotifs(notifs), isactive}
 		tab = append(tab, usr)
 		if err != nil {
 			fmt.Println(err)
@@ -171,65 +201,72 @@ func GetUsers(db *sql.DB) []models.User {
 }
 
 func GetUsersById(db *sql.DB, tofind int) models.User {
-	var id,age, gender, desired int
-	var fname, lname, bio, mail,birthdate,pass string
-	var t, p []byte
-	var tags ,userliked, likedfrom,seenfrom[]int64
 	row, err := db.Query("SELECT * FROM users WHERE id = $1", tofind)
 	if err != nil {
 		fmt.Println(err)
 	}
 	row.Next()
-	row.Scan(&id, &fname, &lname, &bio, &mail, &t, &p,&birthdate, &age,&pass, &gender,&desired,(*pq.Int64Array)(&tags),(*pq.Int64Array)(&userliked),(*pq.Int64Array)(&likedfrom),(*pq.Int64Array)(&seenfrom))
-	usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p), birthdate,age, pass,gender,desired,tags,userliked,likedfrom,seenfrom}
-	// fmt.Println(usr)
+	var fname, lname, email, birthdate, pass, bio string
+	var imageurl []string
+	var id, age, gender, fame int64
+	var tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
+	var coord, notifs []byte
+	var isactive bool
+	err = row.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.Int64Array)(&tags),
+		(*pq.Int64Array)(&Type), (*pq.Int64Array)(&pokeball), (*pq.Int64Array)(&userliked), (*pq.Int64Array)(&likedfrom), (*pq.Int64Array)(&seenfrom),
+		(*pq.Int64Array)(&blocked), (*pq.Int64Array)(&convlist), &coord, &notifs, &isactive)
+	usr := models.User{id, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, JsonToLoc(coord), JsonToNotifs(notifs), isactive}
+	if err != nil {
+		fmt.Println(err)
+	}
 	return usr
 }
 
 func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
 	var rows *sql.Rows
 	var err error
-	if (tofind == "tags" || tofind == "userliked" || tofind == "likedfrom" || tofind == "seenfrom"){
-		rows, err = db.Query("SELECT * FROM users WHERE "+ tofind + " @> ARRAY[" + value + "]::INTEGER[]")
-	}else {
-		fmt.Println(tofind, value)
-		if (tofind == "type"){
-			tofind = "type->>'name'" // permet d'aller chercher des elements dans la struct stockée en json (ici le nom du type) 
-		}
-		if (tofind == "pokeball"){
-			tofind = "pokeball->>'name'" // ici le nom de la pokeball 
-		}
+	if (tofind == "tags" || tofind == "userliked" || tofind == "likedfrom" || tofind == "seenfrom" || tofind == "type" || tofind == "pokeball" || tofind == "convlist" || tofind == "blocked" || tofind == "desiredgender") {
+		rows, err = db.Query("SELECT * FROM users WHERE " + tofind + " @> ARRAY[$1]::INTEGER[]", value)
+	} else if (tofind == "imageurl") {
+		rows, err = db.Query("SELECT * FROM users WHERE " + tofind + " @> ARRAY[" + value + "]::TEXT[]")
+	} else if (tofind == "loc"  || tofind == "notifs"){
+		return nil
+	} else{
 		rows, err = db.Query("SELECT * FROM users WHERE " + tofind + " = $1", value)
-		if err != nil {
-			fmt.Println(err)
-		}
+	}
+	if err != nil {
+		fmt.Println(err)
 	}
 	tab := []models.User{}
 	for rows.Next() {
-		var id,age,gender,desired int
-		var fname, lname, bio, mail,birthdate,pass string
-		var t, p []byte
-		var tags, userliked, likedfrom, seenfrom []int64
-		err := rows.Scan(&id, &fname, &lname, &bio, &mail, &t, &p, &birthdate,&age,&pass,&gender,&desired,(*pq.Int64Array)(&tags),(*pq.Int64Array)(&userliked),(*pq.Int64Array)(&likedfrom),(*pq.Int64Array)(&seenfrom))
-		usr := models.User{id, fname, lname, bio, mail, fromJson(t), fromJson(p),birthdate,age,pass,gender,desired,tags,userliked,likedfrom,seenfrom}
-		fmt.Println(usr)
+		var fname, lname, email, birthdate, pass, bio string
+		var imageurl []string
+		var id, age, gender, fame int64
+		var tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
+		var coord, notifs []byte
+		var isactive bool
+		err = rows.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.Int64Array)(&tags),
+			(*pq.Int64Array)(&Type), (*pq.Int64Array)(&pokeball), (*pq.Int64Array)(&userliked), (*pq.Int64Array)(&likedfrom), (*pq.Int64Array)(&seenfrom),
+			(*pq.Int64Array)(&blocked), (*pq.Int64Array)(&convlist), &coord, &notifs, &isactive)
+		usr := models.User{id, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, JsonToLoc(coord), JsonToNotifs(notifs), isactive}
+
 		tab = append(tab, usr)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	fmt.Println(tab)
-	return tab;
+	return tab
 }
 
-func DelUserById(db *sql.DB, id int){
+func DelUserById(db *sql.DB, id int) {
 	_, err := db.Exec("DELETE FROM users WHERE id = $1", id)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func DelUser(db *sql.DB){
+func DelUser(db *sql.DB) {
 	_, err := db.Exec("DELETE FROM users")
 	if err != nil {
 		panic(err)
