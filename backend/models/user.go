@@ -36,8 +36,8 @@ type User struct {
     Id any `json:"id"`
     Fname  string  `json:"fname"`
     Lname  string  `json:"lname"`
-    Birthdate string `json:"birthDate"`
     Email string `json:"email"`
+    Birthdate string `json:"birthDate"`
     Pass string `json:"pass"`
     Bio string `json:"bio"`
     Imageurl []string `json:"imageurl"` // first == profile picture                 max = 5              no image cannot be like

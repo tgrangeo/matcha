@@ -11,6 +11,9 @@ import (
 )
 
 func GetUsers(w http.ResponseWriter, r *http.Request) {
+	if (!CheckToken(w,r)){
+		return
+	}
 	db := database.ConnectDb()
 	users := database.GetUsers(db)
 	w.Header().Set("Content-Type", "application/json")
@@ -18,6 +21,9 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUsersById(w http.ResponseWriter, r *http.Request) {
+	if (!CheckToken(w,r)){
+		return
+	}
 	//TODO: secure if id doesn t exist
 	params := mux.Vars(r)
 	tofind, _ := strconv.Atoi(params["id"])
@@ -28,6 +34,9 @@ func GetUsersById(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetWhere(w http.ResponseWriter, r *http.Request){
+	if (!CheckToken(w,r)){
+		return
+	}
 	//TODO:where exist ???
 	params := mux.Vars(r)
 	tofind := params["where"]
@@ -40,6 +49,9 @@ func GetWhere(w http.ResponseWriter, r *http.Request){
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+	if (!CheckToken(w,r)){
+		return
+	}
 	decoder := json.NewDecoder(r.Body)
 	db := database.ConnectDb()
 	usr := models.User{}
@@ -52,6 +64,9 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	if (!CheckToken(w,r)){
+		return
+	}
 	params := mux.Vars(r)
 	tofind, _ := strconv.Atoi(params["id"])
 	decoder := json.NewDecoder(r.Body)
@@ -66,6 +81,9 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUsersById(w http.ResponseWriter, r *http.Request) {
+	if (!CheckToken(w,r)){
+		return
+	}
 	params := mux.Vars(r)
 	tofind, _ := strconv.Atoi(params["id"])
 	db := database.ConnectDb()
@@ -73,6 +91,9 @@ func DeleteUsersById(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUsers(w http.ResponseWriter, r *http.Request) {
+	if (!CheckToken(w,r)){
+		return
+	}
 	db := database.ConnectDb()
 	database.DelUser(db)
 }

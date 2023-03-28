@@ -222,17 +222,42 @@ func GetUsersById(db *sql.DB, tofind int) models.User {
 	return usr
 }
 
+func GetUsersByEmail(db *sql.DB, tofind string) models.User {
+	row, err := db.Query("SELECT * FROM users WHERE email = $1", tofind)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if row.Next() {
+		var fname, lname, email, birthdate, pass, bio string
+		var imageurl []string
+		var id, age, gender, fame int64
+		var tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
+		var coord, notifs []byte
+		var isactive bool
+		err = row.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.Int64Array)(&tags),
+			(*pq.Int64Array)(&Type), (*pq.Int64Array)(&pokeball), (*pq.Int64Array)(&userliked), (*pq.Int64Array)(&likedfrom), (*pq.Int64Array)(&seenfrom),
+			(*pq.Int64Array)(&blocked), (*pq.Int64Array)(&convlist), &coord, &notifs, &isactive)
+		usr := models.User{id, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, JsonToLoc(coord), JsonToNotifs(notifs), isactive}
+		if err != nil {
+			fmt.Println(err)
+		}
+		return usr
+	}
+	usr := models.User{}
+	return usr
+}
+
 func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
 	var rows *sql.Rows
 	var err error
-	if (tofind == "tags" || tofind == "userliked" || tofind == "likedfrom" || tofind == "seenfrom" || tofind == "type" || tofind == "pokeball" || tofind == "convlist" || tofind == "blocked" || tofind == "desiredgender") {
-		rows, err = db.Query("SELECT * FROM users WHERE " + tofind + " @> ARRAY[$1]::INTEGER[]", value)
-	} else if (tofind == "imageurl") {
+	if tofind == "tags" || tofind == "userliked" || tofind == "likedfrom" || tofind == "seenfrom" || tofind == "type" || tofind == "pokeball" || tofind == "convlist" || tofind == "blocked" || tofind == "desiredgender" {
+		rows, err = db.Query("SELECT * FROM users WHERE "+tofind+" @> ARRAY[$1]::INTEGER[]", value)
+	} else if tofind == "imageurl" {
 		rows, err = db.Query("SELECT * FROM users WHERE " + tofind + " @> ARRAY[" + value + "]::TEXT[]")
-	} else if (tofind == "loc"  || tofind == "notifs"){
+	} else if tofind == "loc" || tofind == "notifs" {
 		return nil
-	} else{
-		rows, err = db.Query("SELECT * FROM users WHERE " + tofind + " = $1", value)
+	} else {
+		rows, err = db.Query("SELECT * FROM users WHERE "+tofind+" = $1", value)
 	}
 	if err != nil {
 		fmt.Println(err)
