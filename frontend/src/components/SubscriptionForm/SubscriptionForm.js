@@ -9,6 +9,30 @@ import Attract from "./pages/Attract/Attract";
 import Tags from "./pages/Tags/Tags";
 import Credentials from "./pages/Credentials/Credentials";
 
+
+
+function sendNewUser(data) {
+	fetch('http://localhost:8080/api/v1/users', {
+		method: 'POST',
+		mode: 'no-cors',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: data,
+	})
+		.then(response => response.json())
+		.then(data => {
+			// Traitement de la réponse JSON renvoyée par l'API
+			console.log(data);
+		})
+		.catch(error => {
+			console.error('Erreur lors de l\'envoi de la requête :', error);
+		});
+}
+
+
+
+
 const SubscriptionForm = () => {
 	const now = new Date(); // get the current date and time
 	const eighteenYearsAgo = new Date(now.getFullYear() - 18, now.getMonth(), now.getDate());
@@ -57,6 +81,9 @@ const SubscriptionForm = () => {
 				return false;
 			}
 			console.log("request");
+			//parse
+			const json = JSON.stringify(formValues)
+			sendNewUser(json)
 		}
 		return false;
 	};

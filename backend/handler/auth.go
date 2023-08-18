@@ -5,6 +5,7 @@ import (
 	"os"
 	"net/http"
 	"github.com/tgrangeo/matcha/database"
+	"github.com/tgrangeo/matcha/utils"
 	"fmt"
 	"time"
 	"github.com/golang-jwt/jwt/v5"
@@ -32,7 +33,7 @@ func SignIn(w http.ResponseWriter, r *http.Request){
 	db := database.ConnectDb()
 	usr := database.GetUsersByEmail(db, creds.Email)
 	fmt.Println(usr)
-	if (!database.CheckPasswordHash(creds.Password, usr.Pass)){
+	if (!utils.CheckPasswordHash(creds.Password, usr.Pass)){
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
