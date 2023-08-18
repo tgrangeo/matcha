@@ -30,6 +30,13 @@ services:
     ports:
       - 3000:3000
     stdin_open: true
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
 
 volumes:
   postgres-db:
