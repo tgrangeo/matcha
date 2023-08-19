@@ -1,11 +1,17 @@
 @import "../../common.scss";
 
 .CardGrid {
-	.content {
-		@include contentWidth();
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
-		column-gap: 20px;
-		row-gap: 20px;
-	}
+  .content {
+    @include contentWidth();
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 20px;
+    @include tablet {
+      grid-template-columns: 1fr 1fr;
+    }
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
 }

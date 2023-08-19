@@ -2,35 +2,41 @@
 @import "./_mixins.scss";
 @import url("https://fonts.googleapis.com/css2?family=Cabin&display=swap");
 @font-face {
-	font-family: "PokeCardFont"; /*Can be any text*/
-	src: local("Gill Sans Std Bold Condensed"), url("./assets/fonts/Gill_Sans_Light.otf") format("opentype");
+  font-family: "PokeCardFont"; /*Can be any text*/
+  src: local("Gill Sans Std Bold Condensed"),
+    url("./assets/fonts/Gill_Sans_Light.otf") format("opentype");
 }
 
 @font-face {
-	font-family: "PokeCardFontLight"; /*Can be any text*/
-	src: local("Gill Sans Condensed"), url("./assets/fonts/GillSans_Condensed.otf") format("opentype");
-	ascent-override: 100%;
+  font-family: "PokeCardFontLight"; /*Can be any text*/
+  src: local("Gill Sans Condensed"),
+    url("./assets/fonts/GillSans_Condensed.otf") format("opentype");
+  ascent-override: 100%;
 }
 
 @font-face {
-	font-family: "PokeCardFontBold"; /*Can be any text*/
-	src: local("Gill Sans Std Bold Condensed"), url("./assets/fonts/GillSans_Condensed_Bold.otf") format("opentype");
+  font-family: "PokeCardFontBold"; /*Can be any text*/
+  src: local("Gill Sans Std Bold Condensed"),
+    url("./assets/fonts/GillSans_Condensed_Bold.otf") format("opentype");
 }
 $red: #d81921;
+$bluetransparent: #0f124e44;
 $blue: #0f124e;
 $white: #ececff;
 $font: "Cabin", sans-serif;
 $fontCard: "PokeCardFontBold", sans-serif;
 $fontCardLight: "PokeCardFontLight", sans-serif;
+
 body {
-	.App {
-		font-family: $font;
-		background-color: $white;
-		> .content {
-			min-height: calc(100vh - 100px);
-		}
-	}
-	p {
-		margin: 0;
-	}
+  .App {
+    color: $blue;
+    font-family: $font;
+    background-color: $white;
+    > .content {
+      min-height: calc(100vh - 100px);
+    }
+  }
+  p {
+    margin: 0;
+  }
 }

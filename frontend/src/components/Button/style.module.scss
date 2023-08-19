@@ -1,0 +1,42 @@
+@import "../../common.scss";
+
+.container {
+  width: 100%;
+  .filled,
+  .ghost,
+  .outlined {
+    cursor: pointer;
+    display: block;
+    width: max-content;
+    text-transform: uppercase;
+    font-size: 15px;
+    font-weight: bold;
+    transition: all 0.4s ease-in-out;
+  }
+  .filled,
+  .outlined {
+    border: solid 2px $blue;
+    border-radius: 5px;
+    padding: 7px 14px;
+  }
+  .filled {
+    background-color: $blue;
+    color: $white;
+    &:hover {
+      background-color: transparent;
+      color: $blue;
+    }
+  }
+  .outlined {
+    background-color: transparent;
+    color: $blue;
+    &:hover {
+      background-color: $blue;
+      color: $white;
+    }
+  }
+  .ghost {
+    border: none;
+    background-color: transparent;
+  }
+}

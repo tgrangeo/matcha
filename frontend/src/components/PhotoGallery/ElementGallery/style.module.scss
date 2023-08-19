@@ -1,0 +1,117 @@
+@import "../../../common.scss";
+
+.imageAdd {
+  background-color: $bluetransparent;
+  border-radius: 10px;
+  display: flex;
+  width: 100%;
+  aspect-ratio: 1/1;
+  align-items: center;
+  justify-content: center;
+  .input {
+    display: none;
+  }
+  i {
+    font-size: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $white;
+    transform: scale(1);
+    transition: all 0.2s ease-in-out;
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+.image {
+  width: 100%;
+  border-radius: 10px;
+  aspect-ratio: 1/1;
+  position: relative;
+  background-position: center;
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  transition: all 0.5s ease-in-out;
+  &:hover {
+    background-size: auto 105%;
+  }
+  .buttons {
+    position: absolute;
+    border-radius: 8px 0 8px 0;
+    border: solid 1px $white;
+    bottom: 0;
+    right: 0;
+    background-color: $white;
+    padding: 6px 10px 6px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    i {
+      cursor: pointer;
+      color: red;
+      font-size: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: scale(1);
+      transition: all 0.2s ease-in-out;
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+    > label > i {
+      color: $blue;
+      margin-right: 10px;
+    }
+    input {
+      display: none;
+    }
+    .button {
+      margin-top: 20px;
+    }
+  }
+  .confirmationPopupFull {
+    // pointer-events: none;
+
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .confirmationPopup {
+      pointer-events: all;
+      background-color: $white;
+      padding: 20px 40px;
+      > div {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-around;
+        .button {
+          width: max-content;
+          cursor: pointer;
+          text-transform: uppercase;
+          font-size: 15px;
+          font-weight: bold;
+          border: solid 2px $blue;
+          background-color: $blue;
+          border-radius: 5px;
+          color: $white;
+          padding: 7px 14px;
+          text-align: left;
+          transition: all 0.2s ease-in-out;
+          &:hover {
+            background-color: transparent;
+            color: $blue;
+          }
+        }
+      }
+    }
+  }
+}
