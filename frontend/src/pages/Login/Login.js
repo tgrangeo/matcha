@@ -2,17 +2,17 @@ import style from "./style.module.scss";
 import React, { useState } from 'react';
 
 import Logo from "../../assets/pokemeet.png";
+import Input from "../../components/Input/Input";
+import Button from "../../components/Button/Button";
 const Login = () => {
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
 
 	const handleLogin = (event) => {
 		event.preventDefault();
 
 		// Préparez les données à envoyer au serveur
 		const loginData = {
-			email: email,
-			password: password,
+			email: event.target[0].value,
+			password: event.target[1].value,
 		};
 
 		// Effectuez la requête fetch vers le serveur
@@ -31,42 +31,32 @@ const Login = () => {
 				console.error("An error occurred:", error);
 			});
 	};
-
 	return (
 		<div className={style.Login}>
 			<form onSubmit={handleLogin}>
 				<img src={Logo} alt={"PokeMeet"} />
-				<p className={style.row}>
-					<label htmlFor="email">Email</label>
-					<input
-						type="email"
-						name="email"
-						id="email"
-						placeholder="Enter email..."
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						required
-					/>
-				</p>
-				<p className={style.row}>
-					<label htmlFor="password">Password</label>
-					<input
-						type="password"
-						name="password"
-						id="password"
-						placeholder="Enter password..."
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						required
-					/>
-				</p>
-				<input type="submit" value="Log in" />
+				<Input
+					type="email"
+					name="email"
+					required
+					placeholder="Entrer votre email..."
+				>
+					Email
+				</Input>
+				<Input
+					type="password"
+					name="password"
+					required
+					placeholder="Entrer votre mot de passe..."
+				>
+					Mot de passe
+				</Input>
+
+				<Button className={style.Button} style="filled" align="center">
+					Log in
+				</Button>
 				<p className={style.noAccount}>
 					No account? <a href="/subscription">Create account</a>
-				</p>
-				{/* //TODO: create link to /api/v1/resetpass */}
-				<p className={style.noAccount}>
-					Forgot password? <a href="">Recover password</a>
 				</p>
 			</form>
 		</div>

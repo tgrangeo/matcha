@@ -1,0 +1,128 @@
+@import "../../common.scss";
+
+h1 {
+  text-align: center;
+}
+.profile {
+  display: grid;
+  grid-template-columns: 429px auto;
+  column-gap: 40px;
+  row-gap: 40px;
+  @include tablet {
+    grid-template-columns: 1fr;
+  }
+  i[class*="-rr-"] {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+  }
+  .left {
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    @include tablet {
+      justify-content: unset;
+    }
+    .avatar {
+      width: 265px;
+      height: 265px;
+      margin-right: 40px;
+    }
+    .infos {
+      display: grid;
+      row-gap: 20px;
+      grid-template-columns: 1fr;
+      .pokeball,
+      .type {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: $bluetransparent;
+        border-radius: 10px;
+        padding: 7px 5px;
+        width: 100%;
+        row-gap: 5px;
+
+        img,
+        [class*="TypeIcon"] {
+          width: 50px;
+        }
+        > * {
+          width: 50px;
+        }
+        i {
+          text-align: center;
+          margin-left: 5px;
+        }
+        h4 {
+          margin: 0;
+          width: max-content;
+        }
+        div:has(i) {
+          width: max-content;
+          display: flex;
+          align-items: center;
+          i {
+            display: flex;
+            align-items: center;
+            margin-left: 7px;
+          }
+        }
+        p {
+          width: max-content;
+        }
+      }
+    }
+  }
+  .right {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    .name {
+      @include tablet {
+        margin: auto;
+      }
+      display: flex;
+      column-gap: 10px;
+      h2 {
+        margin: 0;
+        display: inline;
+      }
+    }
+
+    textarea {
+      max-width: 100%;
+      min-width: 100%;
+      max-height: 174px;
+      background-color: transparent;
+      border: none;
+      resize: none;
+    }
+    .bio {
+      @include tablet {
+        text-align: center;
+      }
+      margin: 10px 0;
+      font-size: 20px;
+      line-height: 1.6;
+    }
+  }
+}
+.radios {
+  margin: auto;
+  margin-top: 40px;
+  display: flex;
+  column-gap: 40px;
+  justify-content: center;
+  .radio {
+    display: flex;
+    h4 {
+      margin: 0;
+      margin-right: 10px;
+    }
+    > div {
+      margin: 3px auto 0 auto;
+    }
+  }
+}
