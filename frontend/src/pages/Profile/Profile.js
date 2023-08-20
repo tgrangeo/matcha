@@ -8,12 +8,31 @@ import PrivateInfos from "../../components/PrivateInfos/PrivateInfos";
 import PhotoGallery from "../../components/PhotoGallery/PhotoGallery";
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
   const [tagsOptions, setTagsOptions] = useState(null);
   //TODO
   //GET api/v1/tags
   //GET api/v1/me jwt
 
+  const user = {
+    images: [
+      "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
+      "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
+      "",
+      "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
+      "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
+      "",
+    ],
+    pokeball: "masterball",
+    type: "plante",
+    firstname: "Jean",
+    lastname: "Dupont",
+    bio: "Je suis un grand fan de Pokémon et j'adore passer des heures à explorer les régions et attraper de nouveaux Pokémon. Si vous partagez cette passion ou que vous êtes curieux d'en savoir plus, n'hésitez pas à me contacter !",
+    tags: [0],
+    email: "jean.dupont@nasa.fr",
+    gender: "male",
+    attract: { female: true, male: false, nb: false },
+  };
   //TODO:
   useEffect(() => {
     fetch(":8080/api/v1/me")

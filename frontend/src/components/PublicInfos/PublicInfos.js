@@ -5,23 +5,39 @@ import style from "./style.module.scss";
 import { useEffect, useState } from "react";
 import Gender from "../SubscriptionForm/pages/Gender/Gender";
 import Attract from "../SubscriptionForm/pages/Attract/Attract";
+import ElementGallery from "../PhotoGallery/ElementGallery/ElementGallery";
+import Button from "../Button/Button";
 
 const PublicInfos = ({ user, tagsOptions }) => {
+  const [modifiedUser, setModifiedUser] = useState(user);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const options = [
+    { value: "cinema", label: 0 },
+    { value: "la drogue", label: 1 },
+  ];
+
+  const setUser = (key, value) => {
+    const tempUser = { ...user };
+    tempUser[key] = value;
+    setModifiedUser(tempUser);
+  };
+
   return (
     <>
       {/* <h1>Profile</h1> */}
       <div className={style.profile}>
         <div className={style.left}>
-          <div className={style.avatar}>
-            <img src="" alt="avatar" />
-            <i class="fi fi-rr-edit"></i>
-          </div>
+          <ElementGallery
+            className={style.avatar}
+            imageInit={modifiedUser.images[0]}
+            i={0}
+          />
           <div className={style.infos}>
             <div className={style.pokeball}>
               <h4>Pokeball</h4>
-              <Pokeball pokeball={"masterball"} />
+              <Pokeball pokeball={user.pokeball} />
               <div>
-                <p>Masterball</p>
+                <p>{user.pokeball}</p>
                 <i class="fi fi-rr-edit"></i>
               </div>
             </div>
@@ -37,25 +53,46 @@ const PublicInfos = ({ user, tagsOptions }) => {
         </div>
         <div className={style.right}>
           <div className={style.name}>
-            <h2>Prénom</h2>
-            <h2>Nom</h2>
+            <h2>{user.firstname}</h2>
+            <h2>{user.lastname}</h2>
           </div>
 
-          <p className={style.bio}>
-            Je suis un grand fan de Pokémon et j'adore passer des heures à
-            explorer les régions et attraper de nouveaux Pokémon. Si vous
-            partagez cette passion ou que vous êtes curieux d'en savoir plus,
-            n'hésitez pas à me contacter ! <i class="fi fi-rr-edit"></i>
-          </p>
+          {isEditingBio ? (
+            <textarea
+              className={style.bio}
+              value={modifiedUser.bio}
+              maxLength={300}
+              on={(e) => {
+                e.target.style.height = "1px";
+                e.target.style.height = e.target.scrollHeight + "px";
+              }}
+              onChange={(e) => {
+                //update height
+                e.target.style.height = "1px";
+                e.target.style.height = e.target.scrollHeight + "px";
+                setUser("bio", e.target.value);
+              }}
+            ></textarea>
+          ) : (
+            <p className={style.bio}>
+              Je suis un grand fan de Pokémon et j'adore passer des heures à
+              explorer les régions et attraper de nouveaux Pokémon. Si vous
+              partagez cette passion ou que vous êtes curieux d'en savoir plus,
+              n'hésitez pas à me contacter !{" "}
+              <i
+                class="fi fi-rr-edit"
+                onClick={() => setIsEditingBio(true)}
+              ></i>
+            </p>
+          )}
 
           <Select
             isMulti
             name="colors"
-            options={[
-              { label: "cinema", value: 0 },
-              { label: "la drogue", value: 1 },
-            ]}
-            value={1}
+            options={options}
+            value={options.filter((obj) =>
+              modifiedUser.tags.includes(obj.value)
+            )}
             className="basic-multi-select"
             classNamePrefix="select"
             required
@@ -72,7 +109,16 @@ const PublicInfos = ({ user, tagsOptions }) => {
           <Attract value={{ male: true, female: false, nb: true }} />
         </div>
       </div>
-      <button className={style.button}>Modifier</button>
+      {user !== modifiedUser && (
+        <Button
+          Wrapper="button"
+          align="center"
+          styl="filled"
+          className={style.button}
+        >
+          Sauvegarder
+        </Button>
+      )}
     </>
   );
 };

@@ -1,4 +1,5 @@
 import Button from "../Button/Button";
+import Input from "../Input/Input";
 import style from "./style.module.scss";
 
 const PrivateInfos = ({ user, onChange }) => {
@@ -49,27 +50,25 @@ const PrivateInfos = ({ user, onChange }) => {
       <div className={style.NameAndBirthdate} onSubmit={null}>
         <form className={style.formEmail} onSubmit={handleEmailChange}>
           <div>
-            <p>
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                defaultValue={user?.email}
-                placeholder="Entrer le nouvel email..."
-              ></input>
-            </p>
-            <p>
-              <label htmlFor="password">Mot de passe</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                placeholder="Entrer votre mot de passe..."
-              ></input>
-            </p>
+            <Input
+              type="email"
+              name="email"
+              required
+              classNames={style.input}
+              defaultValue={user?.email}
+              placeholder="Entrer le nouvel email"
+            >
+              Email
+            </Input>
+            <Input
+              type="password"
+              name="password"
+              classNames={style.input}
+              required
+              placeholder="Entrer le mot de passe actuel"
+            >
+              Mot de passe
+            </Input>
 
             <Button style="filled" align="left">
               Changer d'email
@@ -78,36 +77,33 @@ const PrivateInfos = ({ user, onChange }) => {
         </form>
         <form className={style.formPassword} onSubmit={handlePasswordChange}>
           <div>
-            <p>
-              <label htmlFor="password">Nouveau mot de passe</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                placeholder="Entrer votre nouveau mot de passe..."
-              ></input>
-            </p>
-            <p>
-              <label htmlFor="repassword">Confirmer mot de passe</label>
-              <input
-                type="password"
-                id="repassword"
-                name="repassword"
-                required
-                placeholder="Confirmer votre nouveau mot de passe..."
-              ></input>
-            </p>
-            <p>
-              <label htmlFor="currentpassword">Mot de passe actuel</label>
-              <input
-                type="password"
-                id="currentpassword"
-                name="currentpassword"
-                required
-                placeholder="Entrer votre mot de passe actuel..."
-              ></input>
-            </p>
+            <Input
+              type="password"
+              name="password"
+              classNames={style.input}
+              required
+              placeholder="Entrer votre nouveau mot de passe."
+            >
+              Mot de passe
+            </Input>
+            <Input
+              type="password"
+              name="repassword"
+              classNames={style.input}
+              required
+              placeholder="Confirmer votre nouveau mot de passe."
+            >
+              Mot de passe
+            </Input>
+            <Input
+              type="password"
+              name="currentpassword"
+              classNames={style.input}
+              required
+              placeholder="Entrer votre mot de passe actuel."
+            >
+              Mot de passe
+            </Input>
             <Button style="filled" align="left">
               Changer de mot de passe
             </Button>
