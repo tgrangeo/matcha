@@ -56,10 +56,11 @@ type User struct {
 	Coord         Loc      `json:"coord"`
 	Notifs        []Notif  `json:"notifs"`
 	Isactive      bool     `json:"isactive"`
+	Token         string   `json:"token"`
 }
 
 //constructor for a new user
-func NewSubUser(id interface{}, fname, lname, email, bd string, age, gender, poketype, pokeball int64) *User {
+func NewSubUser(id interface{}, fname, lname, email, bd, pass, tok string, age, gender, poketype, pokeball int64) *User {
 	return &User{
 		Id:        id,
 		Fname:     fname,
@@ -68,11 +69,12 @@ func NewSubUser(id interface{}, fname, lname, email, bd string, age, gender, pok
 		Type:      []int64{poketype},
 		Pokeball:  []int64{pokeball},
 		Birthdate: bd,
+		Email:     email,
+		Pass:      pass,
+		Token:     tok,
 		// Initialize all other fields
 		Age:           0,
 		Desiredgender: []int64{},
-		Email:         "",
-		Pass:          "123",
 		Bio:           "",
 		Imageurl:      nil,
 		Fame:          0,
@@ -95,4 +97,6 @@ type NewUserInput struct {
 	Gender    string `json:"gender"`
 	Lastname  string `json:"lastname"`
 	Firstname string `json:"firstname"`
+	Email     string `json:"email"`
+	Pass      string `json:"pass"`
 }

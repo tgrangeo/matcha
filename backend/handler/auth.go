@@ -2,44 +2,47 @@ package handler
 
 import (
 	"encoding/json"
-	"os"
+	"fmt"
 	"net/http"
+	"os"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/tgrangeo/matcha/database"
 	"github.com/tgrangeo/matcha/utils"
-	"fmt"
-	"time"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 var jwtKey = []byte(os.Getenv("SECRET_KEY"))
 
 type Credentials struct {
 	Password string `json:"password"`
-	Email string `json:"email"`
+	Email    string `json:"email"`
 }
 
 type Claims struct {
-	Username string `json:"username"`
+	mail string `json:"mail"`
 	jwt.RegisteredClaims
 }
 
-func SignIn(w http.ResponseWriter, r *http.Request){
+func SignIn(w http.ResponseWriter, r *http.Request) {
 	var creds Credentials
 	err := json.NewDecoder(r.Body).Decode(&creds)
-	if (err != nil){
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	db := database.ConnectDb()
 	usr := database.GetUsersByEmail(db, creds.Email)
 	fmt.Println(usr)
-	if (!utils.CheckPasswordHash(creds.Password, usr.Pass)){
+	ret, _ := utils.CheckPasswordHash(creds.Password, usr.Pass)
+	fmt.Println(ret)
+	if !ret {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	expirationTime := time.Now().Add(120 * time.Minute)
 	claims := &Claims{
-		Username: creds.Email,
+		mail: creds.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -58,15 +61,15 @@ func SignIn(w http.ResponseWriter, r *http.Request){
 	w.WriteHeader(http.StatusOK) // return 200 to say all is ok :)
 }
 
-func CheckToken(w http.ResponseWriter, r *http.Request) bool{
+func CheckToken(w http.ResponseWriter, r *http.Request) (*Claims, bool) {
 	c, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
 			w.WriteHeader(http.StatusUnauthorized)
-			return false
+			return nil, false
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		return false
+		return nil, false
 	}
 	tknStr := c.Value
 	claims := &Claims{}
@@ -76,16 +79,16 @@ func CheckToken(w http.ResponseWriter, r *http.Request) bool{
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			w.WriteHeader(http.StatusUnauthorized)
-			return false
+			return nil, false
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		return false
+		return nil, false
 	}
 	if !tkn.Valid {
 		w.WriteHeader(http.StatusUnauthorized)
-		return false
+		return nil, false
 	}
-	return true
+	return claims, true
 }
 
 func Refresh(w http.ResponseWriter, r *http.Request) {
@@ -133,7 +136,6 @@ func Refresh(w http.ResponseWriter, r *http.Request) {
 		Expires: expirationTime,
 	})
 }
-
 
 func Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
