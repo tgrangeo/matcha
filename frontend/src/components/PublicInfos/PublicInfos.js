@@ -29,7 +29,7 @@ const PublicInfos = ({ user, tagsOptions }) => {
         <div className={style.left}>
           <ElementGallery
             className={style.avatar}
-            imageInit={modifiedUser.images[0]}
+            imageInit={modifiedUser["imageurl"][0]}
             i={0}
           />
           <div className={style.infos}>

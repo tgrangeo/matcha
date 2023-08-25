@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Cookies from 'js-cookie';
 import style from "./style.module.scss";
 import KeyboardArrowDownSharpIcon from "@mui/icons-material/KeyboardArrowDownSharp";
 const HeaderProfile = ({ onLogin }) => {
@@ -11,6 +12,25 @@ const HeaderProfile = ({ onLogin }) => {
         profilePictureUrl:
             "https://upload.wikimedia.org/wikipedia/commons/5/57/Chicken_-_melbourne_show_2005.jpg?uselang=fr",
     };
+
+    useEffect(() => {
+        const granola = Cookies.get("matcha")
+        console.log(granola)
+        if (granola)
+            setLogged(true)
+    }, []);
+
+    const login = () => {
+        const granola = Cookies.get("matcha")
+        console.log(granola)
+        if (granola)
+            setLogged(true)
+        if (logged === false) {
+            window.location.href = "http://localhost:3000/login";
+        }
+    };
+
+
     return logged ? (
         <div className={style.headerProfile} onClick={() => setOpen(!open)}>
             <div className={style.left}>
@@ -27,10 +47,7 @@ const HeaderProfile = ({ onLogin }) => {
             <KeyboardArrowDownSharpIcon />
         </div>
     ) : (
-        <div className={style.cta} onClick={() => setLogged(true)}>
-            {
-                // href /login
-            }
+        <div className={style.cta} onClick={login}>
             Se connecter
         </div>
     );

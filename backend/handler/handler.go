@@ -20,16 +20,29 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func GetUsers(w http.ResponseWriter, r *http.Request) {
+// func GetUsers(w http.ResponseWriter, r *http.Request) {
+// 	claims, valid := CheckToken(w, r)
+// 	if !valid {
+// 		return
+// 	}
+// 	fmt.Println(claims.mail)
+// 	db := database.ConnectDb()
+// 	// users := database.GetUsersByEmail(db, claims.mail)
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(users)
+// }
+
+func GetMe(w http.ResponseWriter, r *http.Request) {
 	claims, valid := CheckToken(w, r)
 	if !valid {
 		return
 	}
-	fmt.Println(claims.mail)
 	db := database.ConnectDb()
-	users := database.GetUsers(db)
+	user := database.GetUsersByEmail(db, claims.mail)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	fmt.Println(user.Email)
+	json.NewEncoder(w).Encode(user)
+	w.WriteHeader(http.StatusOK)
 }
 
 func GetUsersById(w http.ResponseWriter, r *http.Request) {
@@ -45,6 +58,22 @@ func GetUsersById(w http.ResponseWriter, r *http.Request) {
 	user := database.GetUsersById(db, tofind)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+}
+
+func GetByLogin(w http.ResponseWriter, r *http.Request) {
+	// claims, valid := CheckToken(w, r)
+	// if !valid {
+	// 	return
+	// }
+	// fmt.Println(claims.mail)
+	params := mux.Vars(r)
+	tofind := params["login"]
+	db := database.ConnectDb()
+	user := database.GetUsersWhere(db, "login", tofind)
+	fmt.Println(user[0])
+	public := models.NewUserPublic(user[0])
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(public)
 }
 
 func GetWhere(w http.ResponseWriter, r *http.Request) {
@@ -84,6 +113,9 @@ func NewPass(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+//TODO:
+// new profile pass avec ancien mot de passe check ancien puis met le nouveau
+
 type TokenRequest struct {
 	Token string `json:"token"`
 }
@@ -122,6 +154,8 @@ func ConfirmRegistration(w http.ResponseWriter, r *http.Request) {
 	}
 	db := database.ConnectDb()
 	users := database.GetUsersWhere(db, "email", "thomas.grangeon9@gmail.com")
+	fmt.Println(users[0])
+	fmt.Println(users[0].Token + " | " + req.Token)
 	if users[0].Token == req.Token {
 		fmt.Println("token ok")
 		w.WriteHeader(http.StatusOK)
@@ -148,14 +182,13 @@ func CreateNewUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//generer un token random pour la confirmation
-	tok, err := utils.RandomToken()
+	tok := fmt.Sprint(utils.GenerateRandomNumber())
 	if err != nil {
 		panic("alert")
 	}
 
 	// Create the new user using the fields from newUserInput
-	log.Println("sub " + tok)
-	newUser := models.NewSubUser(nil, newUserInput.Firstname, newUserInput.Lastname, newUserInput.Email, newUserInput.Birthdate, newUserInput.Pass, tok, 0, 0, newUserInput.Type, newUserInput.Pokeball)
+	newUser := models.NewSubUser(nil, newUserInput.Login, newUserInput.Firstname, newUserInput.Lastname, newUserInput.Email, newUserInput.Birthdate, newUserInput.Pass, tok, 0, 0, newUserInput.Type, newUserInput.Pokeball)
 	log.Println(newUser)
 
 	//checking
@@ -210,6 +243,19 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	// claims, valid := CheckToken(w, r)
+	// if !valid {
+	// 	return
+	// }
+
+	db := database.ConnectDb()
+	users := database.GetUsers(db)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}
+
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	claims, valid := CheckToken(w, r)
 	if !valid {
@@ -249,6 +295,7 @@ func DeleteUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("hello handler")
 	claims, valid := CheckToken(w, r)
 	if !valid {
 		return
@@ -266,7 +313,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	imageIndex := r.FormValue("index")
-
 	// You can adjust the path according to your server's directory structure
 	uploadDir := "./uploads/"
 	err = os.MkdirAll(uploadDir, os.ModePerm)

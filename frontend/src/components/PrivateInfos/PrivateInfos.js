@@ -6,7 +6,7 @@ const PrivateInfos = ({ user, onChange }) => {
   const handleEmailChange = (e) => {
     //fetch api/v1/changeemail (jwt + email)
     //fetch api/v1/changepassword (jwt + email)
-    fetch(":8080/api/v1/changeemail", {
+    fetch("/api/v1/changeemail", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,7 +26,7 @@ const PrivateInfos = ({ user, onChange }) => {
   const handlePasswordChange = (e) => {
     //fetch api/v1/changeemail (jwt + email)
     //fetch api/v1/changepassword (jwt + email)
-    fetch(":8080/api/v1/changepassword", {
+    fetch("/api/v1/changepassword", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

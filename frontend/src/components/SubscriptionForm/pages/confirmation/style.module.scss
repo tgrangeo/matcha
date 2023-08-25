@@ -1,0 +1,49 @@
+@import "../../../../common.scss";
+
+.Conf {
+	//   display: grid;
+	//   grid-template-columns:
+	//     1fr
+	//     1fr;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	margin-bottom: 20px;
+	gap: 20px;
+	grid-template-areas:
+		"a ."
+		"b c";
+
+	.input0 {
+		grid-area: a;
+	}
+
+	.input1 {
+		grid-area: b;
+	}
+
+	.input2 {
+		grid-area: c;
+	}
+}
+
+.but {
+	display: block;
+	background-color: $blue;
+	color: $white;
+	border: solid 2px $blue;
+	border-radius: 10px;
+	padding: 10px 20px;
+	text-transform: uppercase;
+	font-size: 15px;
+	transition: all 0.5s ease;
+	cursor: pointer;
+
+	&:first-child {
+		margin-right: 20px;
+	}
+
+	&:hover {
+		color: $blue;
+		background-color: #fff;
+	}
+}

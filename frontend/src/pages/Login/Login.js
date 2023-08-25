@@ -16,16 +16,18 @@ const Login = () => {
 		};
 
 		// Effectuez la requête fetch vers le serveur
-		fetch("http://localhost:8080/api/v1/signin", {
+		fetch("/api/v1/signin", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify(loginData),
 		})
-			.then((response) => response.json())
 			.then((data) => {
-				// Traitez la réponse du serveur ici (ex: redirigez l'utilisateur)
+				console.log(data.status)
+				if (data.status === 200) {
+					window.location.href = "http://localhost:3000/";
+				}
 			})
 			.catch((error) => {
 				console.error("An error occurred:", error);

@@ -8,11 +8,12 @@ import Gender from "./pages/Gender/Gender";
 import Attract from "./pages/Attract/Attract";
 import Tags from "./pages/Tags/Tags";
 import Credentials from "./pages/Credentials/Credentials";
+import Confirmation from "./pages/confirmation/Confirmation";
 
 function sendNewUser(data) {
-  fetch("http://localhost:8080/api/v1/users", {
+  fetch("/api/v1/users", {
     method: "POST",
-    mode: "no-cors", //TODO: remove
+    // mode: "no-cors", //TODO: remove
     headers: {
       "Content-Type": "application/json",
     },
@@ -51,6 +52,7 @@ const SubscriptionForm = () => {
     "Nous pouvons passer à des questions plus personnelles. Par exemple, peux-tu nous dire qui tu es ? Es-tu un homme, une femme ou peut-être un dresseur non-binaire ? Cette question nous permettra de mieux comprendre ton identité de genre et de te trouver des matchs compatibles.",
     "Ensuite, quel genre de personne cherches-tu sur Pokémeet ? Préfères-tu les hommes, les femmes ou peut-être les deux ? Cette question nous aidera à comprendre tes préférences en matière de rencontres et de te trouver des correspondances qui répondent à tes attentes.",
     "Enfin, pour t'inscrire sur Pokémeet, tu devras nous donner ta date de naissance, ton adresse e-mail et un mot de passe contenant des chiffres et des lettres en majuscules et en minuscules. Il est important que tu sois majeur pour pouvoir utiliser notre plateforme, et nous voulons nous assurer que ton compte reste en sécurité avec un mot de passe solide.",
+    "Super ! Merci d'avoir partagé ces détails avec nous. Nous avons tout ce dont nous avons besoin pour te créer un compte personnalisé sur Pokémeet. Avant de commencer, je tiens à te dire que nous t'avons envoyé un e-mail contenant un code de confirmation. Il te suffit de le saisir ici pour vérifier ton adresse e-mail et finaliser ton inscription. Assure-toi de vérifier ta boîte de réception, y compris le dossier spam, au cas où tu ne trouverais pas l'e-mail tout de suite. Une fois que tu auras saisi le code, tu seras prêt à partir à l'aventure sur Pokémeet ! Nous sommes impatients de te voir trouver ton poke-match parfait !",
     "Merci de prendre le temps de répondre à ces questions, dresseur. Nous sommes impatients de t'aider à trouver ton poke-match parfait !",
     "Tres bien, nous avons tout ce qu'il nous faut pour t'inscrire sur Pokémeet. Nous allons maintenant te demander de confirmer ton adresse e-mail. Tu recevras un e-mail de notre part avec un lien de confirmation! Je te souhaite un bon voyage sur Pokémeet !",
   ];
@@ -70,9 +72,9 @@ const SubscriptionForm = () => {
   const HandleSubmit = (e) => {
     // e.stopPropagation();
     e.preventDefault();
-    if (pageIndex < NB_PAGE - 1) {
+    if (pageIndex < NB_PAGE) {
       setPageIndex(pageIndex + 1);
-    } else {
+    } else if (pageIndex === 6) {
       if (formValues.password !== formValues.repassword) {
         const event = new CustomEvent("ProfChenMessage", {
           detail: { message: "Les mots de passe ne correspondent pas !" },
@@ -84,6 +86,7 @@ const SubscriptionForm = () => {
       //parse
       const json = JSON.stringify(formValues);
       sendNewUser(json);
+      setPageIndex(pageIndex + 1);
     }
     return false;
   };
@@ -133,17 +136,25 @@ const SubscriptionForm = () => {
             email={formValues.email}
           />
         )}
+        {pageIndex === 7 && (
+          <Confirmation
+            onChange={HandleChange}
+            password={formValues.password}
+            repassword={formValues.repassword}
+            email={formValues.email}
+          />
+        )}
         <div className={style.pagination}>
-          {pageIndex !== 0 && (
+          {pageIndex !== 0 && pageIndex <= 6 && (
             <div className={style.previous} onClick={handlePrevious}>
               Precedent
             </div>
           )}
-          <input
+          {pageIndex <= 6 && (<input
             type="submit"
             className={style.next}
             value={pageIndex !== NB_PAGE - 1 ? "Suivant" : "S'inscrire"}
-          ></input>
+          ></input>)}
         </div>
       </form>
     </div>

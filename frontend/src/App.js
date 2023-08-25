@@ -12,7 +12,7 @@ import Subscription from "./pages/Subscription/Subscription";
 const Test = () => {
     useEffect(() => {
         const token = window.location.href.split("=")[1];
-        fetch("http://localhost:8080/api/v1/validate", {
+        fetch("/api/v1/validate", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -43,7 +43,7 @@ const ResetPass = () => {
         }
 
         // Effectuez la requête de réinitialisation de mot de passe
-        fetch("http://localhost:8080/api/v1/newpass", {
+        fetch("/api/v1/newpass", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -18,11 +18,12 @@ func main() {
 	db := database.ConnectDb()
 	defer db.Close()
 	database.CreateTable(db)
+	database.Seed(db)
 
 	corsMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:80")
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 			// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -45,8 +46,11 @@ func main() {
 	router.HandleFunc("/api/v1/newpass", handler.NewPass).Methods("POST")
 
 	//API USER
-	router.HandleFunc("/api/v1/users", handler.GetUsers).Methods("GET")
-	router.HandleFunc("/api/v1/users/{id}", handler.GetUsersById).Methods("GET")
+	router.HandleFunc("/api/v1/me", handler.GetMe).Methods("GET")
+	router.HandleFunc("/api/v1/user/{login}", handler.GetByLogin).Methods("GET")
+	// router.HandleFunc("api/v1/user/{login}", handler.GetUserByLogin).Methods("GET")
+	router.HandleFunc("/api/v1/users", handler.GetAllUsers).Methods("GET")
+	// router.HandleFunc("/api/v1/users/{id}", handler.GetUsersById).Methods("GET")
 	router.HandleFunc("/api/v1/users/{where}/{value}", handler.GetWhere).Methods("GET")
 	// router.HandleFunc("/api/v1/users/?", handler.GetWhere).Methods("GET") URL PARAMS
 	router.HandleFunc("/api/v1/users", handler.CreateNewUser).Methods("POST")
@@ -57,7 +61,6 @@ func main() {
 	router.HandleFunc("api/v1/upload", handler.UploadHandler)
 
 	//tags
-	// TODO: hello
 	// router.HandleFunc("/api/v1/tags", handler.GetTags).Methods("GET")
 
 	handler := cors.Default().Handler(router)

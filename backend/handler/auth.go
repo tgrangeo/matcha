@@ -12,6 +12,8 @@ import (
 	"github.com/tgrangeo/matcha/utils"
 )
 
+//TODO: by login appel db where email = $1 or where login = $1
+
 var jwtKey = []byte(os.Getenv("SECRET_KEY"))
 
 type Credentials struct {
@@ -33,14 +35,13 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 	db := database.ConnectDb()
 	usr := database.GetUsersByEmail(db, creds.Email)
-	fmt.Println(usr)
 	ret, _ := utils.CheckPasswordHash(creds.Password, usr.Pass)
-	fmt.Println(ret)
 	if !ret {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	expirationTime := time.Now().Add(120 * time.Minute)
+	//TODO: define good expiration time less is more
+	expirationTime := time.Now().Add(999 * time.Minute)
 	claims := &Claims{
 		mail: creds.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -54,11 +55,17 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Value:   tokenString,
-		Expires: expirationTime,
+		Name:     "matcha",
+		Value:    tokenString,
+		Expires:  expirationTime,
+		Path:     "/",
+		HttpOnly: true,
+		// Secure:   true,
+		// SameSite: http.SameSiteNoneMode,
 	})
-	w.WriteHeader(http.StatusOK) // return 200 to say all is ok :)
+	fmt.Println("cookie set")
+	// json.NewEncoder(w).Encode("")
+	w.WriteHeader(http.StatusOK)
 }
 
 func CheckToken(w http.ResponseWriter, r *http.Request) (*Claims, bool) {

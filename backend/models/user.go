@@ -34,6 +34,7 @@ type Report struct {
 
 type User struct {
 	Id            any      `json:"id"`
+	Login         string   `json:"login"`
 	Fname         string   `json:"fname"`
 	Lname         string   `json:"lname"`
 	Email         string   `json:"email"`
@@ -59,9 +60,48 @@ type User struct {
 	Token         string   `json:"token"`
 }
 
+type UserPublic struct {
+	Login         string   `json:"login"`
+	Fname         string   `json:"fname"`
+	Lname         string   `json:"lname"`
+	Birthdate     string   `json:"birthDate"`
+	Bio           string   `json:"bio"`
+	Imageurl      []string `json:"imageurl"` // first == profile picture                 max = 5              no image cannot be like
+	Age           int64    `json:"age"`
+	Gender        int64    `json:"gender"` // 0 homme 1 femme 2 non binaire
+	Fame          int64    `json:"fame"`
+	Desiredgender []int64  `json:"desiredgender"` // 0 homme 1 femme 2 non bianaires
+	Tags          []int64  `json:"tags"`
+	Type          []int64  `json:"type"`
+	Pokeball      []int64  `json:"pokeball"`
+	Coord         Loc      `json:"coord"`
+	LikedByMe     bool     `json:"likedbyme"`
+}
+
+func NewUserPublic(usr User) *UserPublic {
+	return &UserPublic{
+		Login:         usr.Login,
+		Fname:         usr.Fname,
+		Lname:         usr.Lname,
+		Birthdate:     usr.Birthdate,
+		Bio:           usr.Bio,
+		Imageurl:      usr.Imageurl,
+		Age:           usr.Age,
+		Gender:        usr.Gender,
+		Fame:          usr.Fame,
+		Desiredgender: usr.Desiredgender,
+		Tags:          usr.Tags,
+		Type:          usr.Type,
+		Pokeball:      usr.Pokeball,
+		Coord:         usr.Coord,
+		LikedByMe:     false,
+	}
+}
+
 //constructor for a new user
-func NewSubUser(id interface{}, fname, lname, email, bd, pass, tok string, age, gender, poketype, pokeball int64) *User {
+func NewSubUser(id interface{}, login, fname, lname, email, bd, pass, tok string, age, gender, poketype, pokeball int64) *User {
 	return &User{
+		Login:     login,
 		Id:        id,
 		Fname:     fname,
 		Lname:     lname,
@@ -76,9 +116,9 @@ func NewSubUser(id interface{}, fname, lname, email, bd, pass, tok string, age, 
 		Age:           0,
 		Desiredgender: []int64{},
 		Bio:           "",
-		Imageurl:      nil,
+		Imageurl:      []string{"https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg"},
 		Fame:          0,
-		Tags:          nil,
+		Tags:          []int64{},
 		Userliked:     nil,
 		Likedfrom:     nil,
 		Seenfrom:      nil,
@@ -91,6 +131,7 @@ func NewSubUser(id interface{}, fname, lname, email, bd, pass, tok string, age, 
 }
 
 type NewUserInput struct {
+	Login     string `json:"login"`
 	Birthdate string `json:"birthdate"`
 	Type      int64  `json:"type"`
 	Pokeball  int64  `json:"pokeball"`
