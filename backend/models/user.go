@@ -135,7 +135,7 @@ type NewUserInput struct {
 	Birthdate string `json:"birthdate"`
 	Type      int64  `json:"type"`
 	Pokeball  int64  `json:"pokeball"`
-	Gender    string `json:"gender"`
+	Gender    int64 `json:"gender"`
 	Lastname  string `json:"lastname"`
 	Firstname string `json:"firstname"`
 	Email     string `json:"email"`

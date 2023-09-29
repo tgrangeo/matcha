@@ -22,7 +22,7 @@ type Credentials struct {
 }
 
 type Claims struct {
-	mail string `json:"mail"`
+	Mail string `json:"mail"`
 	jwt.RegisteredClaims
 }
 
@@ -43,7 +43,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	//TODO: define good expiration time less is more
 	expirationTime := time.Now().Add(999 * time.Minute)
 	claims := &Claims{
-		mail: creds.Email,
+		Mail: creds.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},

@@ -17,6 +17,7 @@ func main() {
 	godotenv.Load(".env")
 	db := database.ConnectDb()
 	defer db.Close()
+	database.DropUsers(db) // for dev
 	database.CreateTable(db)
 	database.Seed(db)
 

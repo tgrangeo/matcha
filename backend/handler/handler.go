@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	// "bytes"
 
 	"github.com/gorilla/mux"
 	"github.com/tgrangeo/matcha/database"
@@ -38,7 +39,7 @@ func GetMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	db := database.ConnectDb()
-	user := database.GetUsersByEmail(db, claims.mail)
+	user := database.GetUsersByEmail(db, claims.Mail)
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Println(user.Email)
 	json.NewEncoder(w).Encode(user)
@@ -50,7 +51,7 @@ func GetUsersById(w http.ResponseWriter, r *http.Request) {
 	if !valid {
 		return
 	}
-	fmt.Println(claims.mail)
+	fmt.Println(claims.Mail)
 	//TODO: secure if id doesn t exist
 	params := mux.Vars(r)
 	tofind, _ := strconv.Atoi(params["id"])
@@ -81,7 +82,7 @@ func GetWhere(w http.ResponseWriter, r *http.Request) {
 	if !valid {
 		return
 	}
-	fmt.Println(claims.mail)
+	fmt.Println(claims.Mail)
 	//TODO:where exist ???
 	params := mux.Vars(r)
 	tofind := params["where"]
@@ -173,10 +174,18 @@ func CreateNewUser(w http.ResponseWriter, r *http.Request) {
 
 	// Define a variable to hold the JSON data
 	var newUserInput models.NewUserInput
-
+	// bod, err := io.ReadAll(r.Body)
+	// if err != nil {
+	// 	http.Error(w, "Error reading request body", http.StatusInternalServerError)
+	// 	return
+	// }
+	// fmt.Printf(string(bod))
 	// Decode the JSON data from the request body into newUserInput
+	// buf := bytes.NewBuffer(r.Body)
 	err := json.NewDecoder(r.Body).Decode(&newUserInput)
+	// err = json.Unmarshal(bod, &newUserInput)
 	if err != nil {
+		log.Printf("Error decoding JSON: %v", err)
 		http.Error(w, "Erreur lors de la lecture des données JSON", http.StatusBadRequest)
 		return
 	}
@@ -185,7 +194,7 @@ func CreateNewUser(w http.ResponseWriter, r *http.Request) {
 	tok := fmt.Sprint(utils.GenerateRandomNumber())
 	if err != nil {
 		panic("alert")
-	}
+}
 
 	// Create the new user using the fields from newUserInput
 	newUser := models.NewSubUser(nil, newUserInput.Login, newUserInput.Firstname, newUserInput.Lastname, newUserInput.Email, newUserInput.Birthdate, newUserInput.Pass, tok, 0, 0, newUserInput.Type, newUserInput.Pokeball)
@@ -261,7 +270,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if !valid {
 		return
 	}
-	fmt.Println(claims.mail)
+	fmt.Println(claims.Mail)
 	decoder := json.NewDecoder(r.Body)
 	db := database.ConnectDb()
 	usr := models.User{}
@@ -278,7 +287,7 @@ func DeleteUsersById(w http.ResponseWriter, r *http.Request) {
 	if !valid {
 		return
 	}
-	fmt.Println(claims.mail)
+	fmt.Println(claims.Mail)
 	params := mux.Vars(r)
 	tofind, _ := strconv.Atoi(params["id"])
 	db := database.ConnectDb()
@@ -300,7 +309,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if !valid {
 		return
 	}
-	fmt.Println(claims.mail)
+	fmt.Println(claims.Mail)
 
 	//todo sortir toute la partie sve image dans une fonction a part + gerer les 5 images max
 	r.ParseMultipartForm(10 << 20) // Max file size 10MB
@@ -339,7 +348,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	// now insert in db
 	db := database.ConnectDb()
-	user := database.GetUsersByEmail(db, claims.mail)
+	user := database.GetUsersByEmail(db, claims.Mail)
 	// Convert imageIndex to an integer
 	index, err := strconv.Atoi(imageIndex)
 	if err != nil {
