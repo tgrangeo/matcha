@@ -70,30 +70,24 @@ func CreateTable(db *sql.DB) error {
 		}
 		fmt.Println(res)
 	}
-
-	// res, err := db.Exec(`SELECT fname FROM users`)
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println(res)
 	return nil
 }
 
-func Seed(db *sql.DB) {
-	_, err := db.Exec(`
-	INSERT INTO users (fname, lname, email, birthdate, pass, bio, imageurl, age, gender, desiredgender, fame, tags, pokeball, type, userliked, likedfrom, seenfrom, blocked, convlist, coord, notifs, isactive, login, temp_token)
-VALUES
-    ('John', 'Doe', 'john@example.com', '1990-01-01', 'hashed_password_1', 'Hello, I am John!', NULL, 32, 1, ARRAY[]::INTEGER[], 100, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 40.7128, "lng": -74.0060}', '{"notif1": true}', true, 'john_doe', 'temp_token_1'),
-    ('Jane', 'Doe', 'jane@example.com', '1992-03-15', 'hashed_password_2', 'Hello, I am Jane!', NULL, 30, 2, ARRAY[]::INTEGER[], 120, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 34.0522, "lng": -118.2437}', '{"notif2": true}', true, 'jane_doe', 'temp_token_2'),
-    ('Alice', 'Smith', 'alice@example.com', '1985-07-10', 'hashed_password_3', 'Hi, I am Alice!', NULL, 36, 2, ARRAY[]::INTEGER[], 80, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 51.5074, "lng": -0.1278}', '{"notif3": true}', true, 'alice_smith', 'temp_token_3'),
-    ('Bob', 'Johnson', 'bob@example.com', '1988-11-22', 'hashed_password_4', 'Hey there, I am Bob!', NULL, 33, 1, ARRAY[]::INTEGER[], 95, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 37.7749, "lng": -122.4194}', '{"notif4": true}', true, 'bob_johnson', 'temp_token_4'),
-	('Emily', 'Williams', 'emily@example.com', '1991-06-12', 'hashed_password_5', 'Hi, I am Emily!', NULL, 31, 2, ARRAY[]::INTEGER[], 85, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 41.8781, "lng": -87.6298}', '{"notif5": true}', true, 'emily_williams', 'temp_token_5')
-	`)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Seed added")
-}
+// func Seed(db *sql.DB) {
+// 	_, err := db.Exec(`
+// 	INSERT INTO users (fname, lname, email, birthdate, pass, bio, imageurl, age, gender, desiredgender, fame, tags, pokeball, type, userliked, likedfrom, seenfrom, blocked, convlist, coord, notifs, isactive, login, temp_token)
+// VALUES
+//     ('John', 'Doe', 'john@example.com', '1990-01-01', 'hashed_password_1', 'Hello, I am John!', NULL, 32, 1, ARRAY[]::INTEGER[], 100, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 40.7128, "lng": -74.0060}', '{"notif1": true}', true, 'john_doe', 'temp_token_1'),
+//     ('Jane', 'Doe', 'jane@example.com', '1992-03-15', 'hashed_password_2', 'Hello, I am Jane!', NULL, 30, 2, ARRAY[]::INTEGER[], 120, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 34.0522, "lng": -118.2437}', '{"notif2": true}', true, 'jane_doe', 'temp_token_2'),
+//     ('Alice', 'Smith', 'alice@example.com', '1985-07-10', 'hashed_password_3', 'Hi, I am Alice!', NULL, 36, 2, ARRAY[]::INTEGER[], 80, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 51.5074, "lng": -0.1278}', '{"notif3": true}', true, 'alice_smith', 'temp_token_3'),
+//     ('Bob', 'Johnson', 'bob@example.com', '1988-11-22', 'hashed_password_4', 'Hey there, I am Bob!', NULL, 33, 1, ARRAY[]::INTEGER[], 95, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 37.7749, "lng": -122.4194}', '{"notif4": true}', true, 'bob_johnson', 'temp_token_4'),
+// 	('Emily', 'Williams', 'emily@example.com', '1991-06-12', 'hashed_password_5', 'Hi, I am Emily!', NULL, 31, 2, ARRAY[]::INTEGER[], 85, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 41.8781, "lng": -87.6298}', '{"notif5": true}', true, 'emily_williams', 'temp_token_5')
+// 	`)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	fmt.Println("Seed added")
+// }
 
 func InsertUser(db *sql.DB, user models.User) {
 	fmt.Println(user)
@@ -124,7 +118,6 @@ VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9, $10, $11, $12, $13, $14, $15, $16, $1
 }
 
 func UpdateUser(db *sql.DB, user models.User) {
-	//crypt pass
 	crypted, _ := utils.HashPassword(user.Pass)
 	age := utils.Age(utils.StringToTime(user.Birthdate), time.Now())
 	insertStmt := `UPDATE users SET fname = $1, lname = $2, email = $3, birthdate = $4, pass = $5, bio = $6, imageurl = $8, age = $9, gender = $10, desiredgender = $11, fame = $12, tags = $13, pokeball = $14, type = $15, userliked = $16, likedfrom = $17, seenfrom = $18, blocked = $19, convlist = $20, coord = $21, notifs = $22, isactive = $23, login = $24, temp_token = $25 WHERE id = $7`
@@ -146,14 +139,14 @@ func GetUsers(db *sql.DB) []models.User {
 		var tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
 		var coord, notifs []byte
 		var isactive bool
-		err := rows.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.Int64Array)(&tags),
-			(*pq.Int64Array)(&Type), (*pq.Int64Array)(&pokeball), (*pq.Int64Array)(&userliked), (*pq.Int64Array)(&likedfrom), (*pq.Int64Array)(&seenfrom),
-			(*pq.Int64Array)(&blocked), (*pq.Int64Array)(&convlist), &coord, &notifs, &isactive, &token, &login)
-		usr := models.User{id, login, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, utils.JsonToLoc(coord), utils.JsonToNotifs(notifs), isactive, token}
-		tab = append(tab, usr)
+		err := rows.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, pq.Array(&imageurl), &age, &gender, pq.Array(&desiredgender), &fame, pq.Array(&tags),
+			pq.Array(&Type), pq.Array(&pokeball), pq.Array(&userliked), pq.Array(&likedfrom), pq.Array(&seenfrom),
+			pq.Array(&blocked), pq.Array(&convlist), &coord, &notifs, &isactive, &token, &login)
 		if err != nil {
 			fmt.Println(err)
 		}
+		usr := models.User{id, login, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, utils.JsonToLoc(coord), utils.JsonToNotifs(notifs), isactive, token}
+		tab = append(tab, usr)
 	}
 	return tab
 }

@@ -2,6 +2,8 @@ package main
 
 import (
 	// "fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -19,7 +21,18 @@ func main() {
 	defer db.Close()
 	database.DropUsers(db) // for dev
 	database.CreateTable(db)
-	database.Seed(db)
+
+	// Lire le contenu du fichier seed.sql
+	sqlFile, err := ioutil.ReadFile("database/seed.sql")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Exécution du script SQL contenu dans seed.sql
+	_, err = db.Exec(string(sqlFile))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	corsMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +64,7 @@ func main() {
 	router.HandleFunc("/api/v1/user/{login}", handler.GetByLogin).Methods("GET")
 	// router.HandleFunc("api/v1/user/{login}", handler.GetUserByLogin).Methods("GET")
 	router.HandleFunc("/api/v1/users", handler.GetAllUsers).Methods("GET")
-	// router.HandleFunc("/api/v1/users/{id}", handler.GetUsersById).Methods("GET")
+	router.HandleFunc("/api/v1/users/id={id}", handler.GetUsersById).Methods("GET")
 	router.HandleFunc("/api/v1/users/{where}/{value}", handler.GetWhere).Methods("GET")
 	// router.HandleFunc("/api/v1/users/?", handler.GetWhere).Methods("GET") URL PARAMS
 	router.HandleFunc("/api/v1/users", handler.CreateNewUser).Methods("POST")
