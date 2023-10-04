@@ -33,7 +33,7 @@ type Report struct {
 }
 
 type User struct {
-	Id            any      `json:"id"`
+	Id            int64    `json:"id"`
 	Login         string   `json:"login"`
 	Fname         string   `json:"fname"`
 	Lname         string   `json:"lname"`
@@ -46,7 +46,7 @@ type User struct {
 	Gender        int64    `json:"gender"` // 0 homme 1 femme 2 non binaire
 	Fame          int64    `json:"fame"`
 	Desiredgender []int64  `json:"desiredgender"` // 0 homme 1 femme 2 non bianaires
-	Tags          []int64  `json:"tags"`
+	Tags          []string `json:"tags"`
 	Type          []int64  `json:"type"`
 	Pokeball      []int64  `json:"pokeball"`
 	Userliked     []int64  `json:"userliked"`
@@ -71,7 +71,7 @@ type UserPublic struct {
 	Gender        int64    `json:"gender"` // 0 homme 1 femme 2 non binaire
 	Fame          int64    `json:"fame"`
 	Desiredgender []int64  `json:"desiredgender"` // 0 homme 1 femme 2 non bianaires
-	Tags          []int64  `json:"tags"`
+	Tags          []string `json:"tags"`
 	Type          []int64  `json:"type"`
 	Pokeball      []int64  `json:"pokeball"`
 	Coord         Loc      `json:"coord"`
@@ -99,7 +99,7 @@ func NewUserPublic(usr User) *UserPublic {
 }
 
 //constructor for a new user
-func NewSubUser(id interface{}, login, fname, lname, email, bd, pass, tok string, age, gender, poketype, pokeball int64) *User {
+func NewSubUser(login, fname, lname, email, bd, pass, tok string, age, gender, poketype, pokeball, id int64) *User {
 	return &User{
 		Login:     login,
 		Id:        id,
@@ -118,7 +118,7 @@ func NewSubUser(id interface{}, login, fname, lname, email, bd, pass, tok string
 		Bio:           "",
 		Imageurl:      []string{"https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg"},
 		Fame:          0,
-		Tags:          []int64{},
+		Tags:          []string{},
 		Userliked:     nil,
 		Likedfrom:     nil,
 		Seenfrom:      nil,

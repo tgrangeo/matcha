@@ -2,6 +2,7 @@ package main
 
 import (
 	// "fmt"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -28,10 +29,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Exécution du script SQL contenu dans seed.sql
-	_, err = db.Exec(string(sqlFile))
-	if err != nil {
-		log.Fatal(err)
+	// Exécution du script SQL contenu dans seed.sql\
+	count, _ := database.CheckUsers(db)
+	if count == 0 {
+		_, err = db.Exec(string(sqlFile))
+		if err != nil {
+			log.Fatal(err)
+		}
+		database.Initialize(db)
+		fmt.Println("seed loaded")
 	}
 
 	corsMiddleware := func(next http.Handler) http.Handler {

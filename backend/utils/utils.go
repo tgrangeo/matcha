@@ -127,6 +127,37 @@ func CheckUser(user models.User) (int, string) {
 	return 0, ""
 }
 
+func CalculateAge(dateOfBirth string) (int, error) { //for initialize
+	// Parse the dateOfBirth string into a time.Time object
+	dob, err := time.Parse("2006-01-02", dateOfBirth)
+	if err != nil {
+		return 0, err
+	}
+
+	// Calculate the age by comparing the birthdate with the current date
+	currentDate := time.Now()
+	age := currentDate.Year() - dob.Year()
+
+	// Check if the birthday has already occurred this year
+	if currentDate.YearDay() < dob.YearDay() {
+		age--
+	}
+
+	return age, nil
+}
+
+func GenerateRandomTags() []string {
+	r.Seed(time.Now().UnixNano())
+	numTags := r.Intn(6) + 3 // Génère un nombre aléatoire entre 3 et 8
+	randomTags := make([]string, numTags)
+
+	for i := 0; i < numTags; i++ {
+		randomIndex := r.Intn(len(models.Tags))
+		randomTags[i] = models.Tags[randomIndex]
+	}
+	return randomTags
+}
+
 //generate a number for email confirmation
 func GenerateRandomNumber() int {
 	r.Seed(time.Now().UnixNano())

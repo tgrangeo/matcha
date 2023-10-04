@@ -44,7 +44,7 @@ func CreateTable(db *sql.DB) error {
 			gender INTEGER,
 			desiredgender INTEGER ARRAY,
 			fame INTEGER,
-			tags INTEGER ARRAY,
+			tags TEXT ARRAY,
 			pokeball INTEGER ARRAY,
 			type INTEGER ARRAY,
 			userliked INTEGER ARRAY,
@@ -64,30 +64,25 @@ func CreateTable(db *sql.DB) error {
 		`CREATE TABLE IF NOT EXISTS conversations( id SERIAL PRIMARY KEY, user1 INTEGER, user2 INTEGER, messages JSONB)`,
 	}
 	for _, tableDef := range tableDefs {
-		res, err := db.Exec(tableDef)
+		_, err := db.Exec(tableDef)
 		if err != nil {
 			return err
 		}
-		fmt.Println(res)
 	}
+	fmt.Println("table created")
 	return nil
 }
 
-// func Seed(db *sql.DB) {
-// 	_, err := db.Exec(`
-// 	INSERT INTO users (fname, lname, email, birthdate, pass, bio, imageurl, age, gender, desiredgender, fame, tags, pokeball, type, userliked, likedfrom, seenfrom, blocked, convlist, coord, notifs, isactive, login, temp_token)
-// VALUES
-//     ('John', 'Doe', 'john@example.com', '1990-01-01', 'hashed_password_1', 'Hello, I am John!', NULL, 32, 1, ARRAY[]::INTEGER[], 100, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 40.7128, "lng": -74.0060}', '{"notif1": true}', true, 'john_doe', 'temp_token_1'),
-//     ('Jane', 'Doe', 'jane@example.com', '1992-03-15', 'hashed_password_2', 'Hello, I am Jane!', NULL, 30, 2, ARRAY[]::INTEGER[], 120, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 34.0522, "lng": -118.2437}', '{"notif2": true}', true, 'jane_doe', 'temp_token_2'),
-//     ('Alice', 'Smith', 'alice@example.com', '1985-07-10', 'hashed_password_3', 'Hi, I am Alice!', NULL, 36, 2, ARRAY[]::INTEGER[], 80, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 51.5074, "lng": -0.1278}', '{"notif3": true}', true, 'alice_smith', 'temp_token_3'),
-//     ('Bob', 'Johnson', 'bob@example.com', '1988-11-22', 'hashed_password_4', 'Hey there, I am Bob!', NULL, 33, 1, ARRAY[]::INTEGER[], 95, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 37.7749, "lng": -122.4194}', '{"notif4": true}', true, 'bob_johnson', 'temp_token_4'),
-// 	('Emily', 'Williams', 'emily@example.com', '1991-06-12', 'hashed_password_5', 'Hi, I am Emily!', NULL, 31, 2, ARRAY[]::INTEGER[], 85, ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], ARRAY[]::INTEGER[], '{"lat": 41.8781, "lng": -87.6298}', '{"notif5": true}', true, 'emily_williams', 'temp_token_5')
-// 	`)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	fmt.Println("Seed added")
-// }
+func CheckUsers(db *sql.DB) (int, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s", "users")
+	var count int
+	err := db.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
 
 func InsertUser(db *sql.DB, user models.User) {
 	fmt.Println(user)
@@ -134,9 +129,9 @@ func GetUsers(db *sql.DB) []models.User {
 	rows, _ := db.Query("SELECT * FROM users")
 	for rows.Next() {
 		var login, fname, lname, email, birthdate, pass, bio, token string
-		var imageurl []string
+		var tags, imageurl []string
 		var id, age, gender, fame int64
-		var tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
+		var Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
 		var coord, notifs []byte
 		var isactive bool
 		err := rows.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, pq.Array(&imageurl), &age, &gender, pq.Array(&desiredgender), &fame, pq.Array(&tags),
@@ -158,12 +153,12 @@ func GetUsersById(db *sql.DB, tofind int) models.User {
 	}
 	row.Next()
 	var login, fname, lname, email, birthdate, pass, bio, token string
-	var imageurl []string
+	var tags, imageurl []string
 	var id, age, gender, fame int64
-	var tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
+	var Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
 	var coord, notifs []byte
 	var isactive bool
-	err = row.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.Int64Array)(&tags),
+	err = row.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.StringArray)(&tags),
 		(*pq.Int64Array)(&Type), (*pq.Int64Array)(&pokeball), (*pq.Int64Array)(&userliked), (*pq.Int64Array)(&likedfrom), (*pq.Int64Array)(&seenfrom),
 		(*pq.Int64Array)(&blocked), (*pq.Int64Array)(&convlist), &coord, &notifs, &isactive, &login, &token)
 	usr := models.User{id, login, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, utils.JsonToLoc(coord), utils.JsonToNotifs(notifs), isactive, token}
@@ -180,12 +175,12 @@ func GetUsersByEmail(db *sql.DB, tofind string) models.User {
 	}
 	if row.Next() {
 		var login, fname, lname, email, birthdate, pass, bio, token string
-		var imageurl []string
+		var tags, imageurl []string
 		var id, age, gender, fame int64
-		var tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
+		var Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
 		var coord, notifs []byte
 		var isactive bool
-		err = row.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.Int64Array)(&tags),
+		err = row.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.StringArray)(&tags),
 			(*pq.Int64Array)(&Type), (*pq.Int64Array)(&pokeball), (*pq.Int64Array)(&userliked), (*pq.Int64Array)(&likedfrom), (*pq.Int64Array)(&seenfrom),
 			(*pq.Int64Array)(&blocked), (*pq.Int64Array)(&convlist), &coord, &notifs, &isactive, &login, &token)
 		usr := models.User{id, login, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, utils.JsonToLoc(coord), utils.JsonToNotifs(notifs), isactive, token}
@@ -216,12 +211,12 @@ func GetUsersWhere(db *sql.DB, tofind string, value string) []models.User {
 	tab := []models.User{}
 	for rows.Next() {
 		var login, fname, lname, email, birthdate, pass, bio, token string
-		var imageurl []string
+		var tags, imageurl []string
 		var id, age, gender, fame int64
-		var tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
+		var Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
 		var coord, notifs []byte
 		var isactive bool
-		err = rows.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.Int64Array)(&tags),
+		err = rows.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.StringArray)(&tags),
 			(*pq.Int64Array)(&Type), (*pq.Int64Array)(&pokeball), (*pq.Int64Array)(&userliked), (*pq.Int64Array)(&likedfrom), (*pq.Int64Array)(&seenfrom),
 			(*pq.Int64Array)(&blocked), (*pq.Int64Array)(&convlist), &coord, &notifs, &isactive, &token, &login)
 		usr := models.User{id, login, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, utils.JsonToLoc(coord), utils.JsonToNotifs(notifs), isactive, token}
@@ -264,4 +259,64 @@ func DropUsers(db *sql.DB) {
 		panic(err)
 	}
 	fmt.Println("table users dropped")
+}
+
+// func Initialize(db *sql.DB) {
+// 	// Obtenir le nombre total d'utilisateurs dans la table users
+// 	var userCount int
+// 	err := db.QueryRow("SELECT COUNT(*) FROM users").Scan(&userCount)
+// 	if err != nil {
+// 		fmt.Println("Erreur lors de la récupération du nombre d'utilisateurs:", err)
+// 		return
+// 	}
+
+// 	// Parcourir chaque utilisateur et effectuer des opérations
+// 	for i := 1; i <= userCount; i++ {
+// 		usr := GetUsersById(db, i)
+// 		// Effectuez ici les opérations souhaitées sur l'utilisateur (usr)
+// 		fmt.Printf("Utilisateur #%d : %s %s\n", i, usr.Fname, usr.Birthdate)
+// 		// Exemple : Mettre à jour l'utilisateur
+// 		UpdateUser(db, usr)
+// 	}
+// }
+
+func Initialize(db *sql.DB) {
+	// Retrieve all users from the table users
+	rows, err := db.Query("SELECT * FROM users")
+	if err != nil {
+		fmt.Println("Erreur lors de la récupération des utilisateurs:", err)
+		return
+	}
+	defer rows.Close()
+
+	// Initialize a slice to store the users
+	var users []models.User
+
+	// Loop through the result set and populate the users slice
+	for rows.Next() {
+		var login, fname, lname, email, birthdate, pass, bio, token string
+		var tags, imageurl []string
+		var id, age, gender, fame int64
+		var Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, desiredgender []int64
+		var coord, notifs []byte
+		var isactive bool
+		err = rows.Scan(&id, &fname, &lname, &email, &birthdate, &pass, &bio, (*pq.StringArray)(&imageurl), &age, &gender, (*pq.Int64Array)(&desiredgender), &fame, (*pq.StringArray)(&tags),
+			(*pq.Int64Array)(&Type), (*pq.Int64Array)(&pokeball), (*pq.Int64Array)(&userliked), (*pq.Int64Array)(&likedfrom), (*pq.Int64Array)(&seenfrom),
+			(*pq.Int64Array)(&blocked), (*pq.Int64Array)(&convlist), &coord, &notifs, &isactive, &token, &login)
+		usr := models.User{id, login, fname, lname, email, birthdate, pass, bio, imageurl, age, gender, fame, desiredgender, tags, Type, pokeball, userliked, likedfrom, seenfrom, blocked, convlist, utils.JsonToLoc(coord), utils.JsonToNotifs(notifs), isactive, token}
+		users = append(users, usr)
+	}
+
+	// Process and update each user as needed
+	for _, usr := range users {
+		//age
+		dob, _ := time.Parse("2006-01-02", usr.Birthdate)
+		age := utils.Age(dob, time.Now())
+		usr.Age = int64(age)
+		//login
+		usr.Login = fmt.Sprintf("User%d", usr.Id)
+		//tags
+		usr.Tags = utils.GenerateRandomTags()
+		UpdateUser(db, usr)
+	}
 }

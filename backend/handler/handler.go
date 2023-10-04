@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+
 	// "bytes"
 
 	"github.com/gorilla/mux"
@@ -194,10 +195,10 @@ func CreateNewUser(w http.ResponseWriter, r *http.Request) {
 	tok := fmt.Sprint(utils.GenerateRandomNumber())
 	if err != nil {
 		panic("alert")
-}
+	}
 
 	// Create the new user using the fields from newUserInput
-	newUser := models.NewSubUser(nil, newUserInput.Login, newUserInput.Firstname, newUserInput.Lastname, newUserInput.Email, newUserInput.Birthdate, newUserInput.Pass, tok, 0, 0, newUserInput.Type, newUserInput.Pokeball)
+	newUser := models.NewSubUser(newUserInput.Login, newUserInput.Firstname, newUserInput.Lastname, newUserInput.Email, newUserInput.Birthdate, newUserInput.Pass, tok, 0, 0, newUserInput.Type, newUserInput.Pokeball, 0)
 	log.Println(newUser)
 
 	//checking
